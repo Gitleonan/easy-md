@@ -31,6 +31,18 @@ export async function printContent(el: HTMLElement, theme: 'light' | 'dark'): Pr
   printWin.print();
 }
 
+/** 导出 HTML 文件 */
+export async function exportHtml(contentHtml: string, theme: 'light' | 'dark'): Promise<void> {
+  const full = buildStandaloneHtml(contentHtml, '', theme);
+  const blob = new Blob([full], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'export.html';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 /** 复制渲染后的富文本到剪贴板 */
 export async function copyRichContent(el: HTMLElement): Promise<void> {
   const html = el.innerHTML;

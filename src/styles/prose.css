@@ -1,1 +1,119 @@
-/* 占位：Task 3.1 会填充 prose 排版 */
+/* GitHub-like prose typography */
+.md-content h1, .md-content h2 {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3em;
+}
+
+.md-content h1 { font-size: 2em; margin: 0.67em 0; }
+.md-content h2 { font-size: 1.5em; margin: 1em 0 0.67em; }
+.md-content h3 { font-size: 1.25em; margin: 1em 0 0.5em; }
+.md-content h4 { font-size: 1em; margin: 1em 0 0.5em; }
+.md-content h5 { font-size: 0.875em; margin: 1em 0 0.5em; }
+.md-content h6 { font-size: 0.85em; margin: 1em 0 0.5em; color: var(--fg-muted); }
+
+.md-content a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.md-content a:hover { text-decoration: underline; }
+
+.md-content p { margin: 0 0 16px; }
+
+.md-content code:not(pre code) {
+  background: var(--code-bg);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+  font-size: 0.9em;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+}
+
+.md-content pre {
+  background: var(--code-bg);
+  padding: 16px;
+  border-radius: 6px;
+  overflow: auto;
+  margin: 0 0 16px;
+}
+
+.md-content pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.85em;
+}
+
+.md-content blockquote {
+  border-left: 4px solid var(--border);
+  padding: 0 16px;
+  color: var(--fg-muted);
+  margin: 0 0 16px;
+}
+
+.md-content table {
+  border-collapse: collapse;
+  margin: 0 0 16px;
+  width: 100%;
+}
+
+.md-content th, .md-content td {
+  border: 1px solid var(--border);
+  padding: 6px 13px;
+}
+
+.md-content th {
+  background: var(--bg-secondary);
+  font-weight: 600;
+}
+
+.md-content img {
+  max-width: 100%;
+  cursor: zoom-in;
+  border-radius: 4px;
+}
+
+.md-content mark {
+  background: var(--mark-bg);
+  padding: 0.1em 0.2em;
+  border-radius: 3px;
+}
+
+.md-content input[type="checkbox"] {
+  margin-right: 0.5em;
+}
+
+.md-content ul, .md-content ol {
+  padding-left: 2em;
+  margin: 0 0 16px;
+}
+
+.md-content li + li {
+  margin-top: 0.25em;
+}
+
+.md-content hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 24px 0;
+}
+
+/* 脚注 */
+.md-content .footnotes {
+  font-size: 0.9em;
+  color: var(--fg-muted);
+  border-top: 1px solid var(--border);
+  padding-top: 1em;
+  margin-top: 2em;
+}
+
+/* Mermaid */
+.md-content .mermaid {
+  text-align: center;
+  margin: 16px 0;
+}
+
+/* KaTeX */
+.md-content .katex-display {
+  margin: 16px 0;
+  overflow-x: auto;
+}

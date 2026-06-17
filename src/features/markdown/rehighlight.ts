@@ -1,6 +1,5 @@
 import { renderMarkdown } from './render';
 import { highlightCodeBlocks } from './highlight';
-import { extractToc } from './toc';
 import { useTabsStore } from '../../stores/tabsStore';
 
 /** 主题变化时重新高亮所有标签的代码块 */
