@@ -12,9 +12,17 @@ export function useOpenFile() {
   // 拖拽
   useEffect(() => {
     const unlisten = getCurrentWebview().onDragDropEvent(async (e) => {
+      console.log('[openFile] drag-drop event:', e.payload);
       if (e.payload.type === 'drop') {
         const paths = (e.payload.paths || []).filter((p: string) => MD_EXT.test(p));
-        for (const p of paths) await openTab(p);
+        console.log('[openFile] filtered md paths:', paths);
+        for (const p of paths) {
+          try {
+            await openTab(p);
+          } catch (err) {
+            console.error('[openFile] openTab failed for', p, err);
+          }
+        }
       }
     });
     return () => { unlisten.then((u) => u()); };
@@ -23,9 +31,19 @@ export function useOpenFile() {
 
 /** 通过文件对话框打开 */
 export async function openViaDialog() {
-  const paths = await pickMdFiles();
-  if (!paths) return;
-  for (const p of paths) {
-    await useTabsStore.getState().openTab(p);
+  console.log('[openViaDialog] opening file dialog...');
+  try {
+    const paths = await pickMdFiles();
+    console.log('[openViaDialog] selected paths:', paths);
+    if (!paths) return;
+    for (const p of paths) {
+      try {
+        await useTabsStore.getState().openTab(p);
+      } catch (err) {
+        console.error('[openViaDialog] openTab failed for', p, err);
+      }
+    }
+  } catch (err) {
+    console.error('[openViaDialog] pickMdFiles failed:', err);
   }
 }

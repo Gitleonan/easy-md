@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { TocItem } from '../../types';
 
 export interface TocNode extends TocItem {
@@ -24,6 +25,7 @@ export function buildTocTree(flat: TocItem[]): TocNode[] {
 }
 
 export function Sidebar({ toc }: { toc: TocItem[] }) {
+  const [collapsed, setCollapsed] = useState(false);
   const tree = buildTocTree(toc);
 
   if (!tree.length) return null;
@@ -51,9 +53,18 @@ export function Sidebar({ toc }: { toc: TocItem[] }) {
   );
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-header">目录</div>
-      {renderNodes(tree)}
+    <aside className={`sidebar ${collapsed ? 'sidebar-collapsed' : ''}`}>
+      <div className="sidebar-header">
+        <span>目录</span>
+        <button
+          className="sidebar-toggle"
+          onClick={() => setCollapsed(!collapsed)}
+          title={collapsed ? '展开目录' : '收起目录'}
+        >
+          {collapsed ? '▶' : '◀'}
+        </button>
+      </div>
+      {!collapsed && renderNodes(tree)}
     </aside>
   );
 }

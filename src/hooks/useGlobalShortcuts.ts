@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useSearchStore } from '../stores/searchStore';
 import { useThemeStore } from '../stores/themeStore';
 import { isMac } from '../utils/platform';
+import { openViaDialog } from './useOpenFile';
 
 export function useGlobalShortcuts() {
   useEffect(() => {
@@ -13,6 +14,9 @@ export function useGlobalShortcuts() {
       } else if (mod && e.shiftKey && e.key.toLowerCase() === 't') {
         e.preventDefault();
         useThemeStore.getState().toggle();
+      } else if (mod && e.key.toLowerCase() === 'o') {
+        e.preventDefault();
+        openViaDialog();
       }
     };
     window.addEventListener('keydown', onKey);

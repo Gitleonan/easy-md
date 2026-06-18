@@ -23,11 +23,16 @@ async function readFile(path: string): Promise<string> {
 }
 
 async function buildTab(filePath: string): Promise<Tab> {
+  console.log('[buildTab] reading file:', filePath);
   const source = await readFile(filePath);
+  console.log('[buildTab] file read, length:', source.length);
   const toc = extractToc(source);
+  console.log('[buildTab] toc extracted:', toc.length, 'items');
   const rawHtml = renderMarkdown(source);
+  console.log('[buildTab] markdown rendered, html length:', rawHtml.length);
   const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
   const html = await highlightCodeBlocks(rawHtml, theme);
+  console.log('[buildTab] highlight done, html length:', html.length);
   const fileName = filePath.split(/[/\\]/).pop() || filePath;
   return {
     id: `tab-${++seq}`,
@@ -54,20 +59,28 @@ export const useTabsStore = create<TabsState>((set, get) => ({
   activeTabId: null,
 
   async openTab(filePath) {
+    console.log('[openTab] called with:', filePath);
     const normalized = filePath.replace(/\//g, '\\');
     const existing = get().tabs.find(
       (t) => t.filePath === normalized || t.filePath === filePath,
     );
     if (existing) {
+      console.log('[openTab] file already open, switching to tab:', existing.id);
       set({ activeTabId: existing.id });
       return;
     }
-    const tab = await buildTab(filePath);
-    set((s) => {
-      const tabs = [...s.tabs, tab];
-      syncWatcherFromTabs(tabs);
-      return { tabs, activeTabId: tab.id };
-    });
+    try {
+      const tab = await buildTab(filePath);
+      console.log('[openTab] tab built successfully:', tab.id, tab.fileName);
+      set((s) => {
+        const tabs = [...s.tabs, tab];
+        syncWatcherFromTabs(tabs);
+        return { tabs, activeTabId: tab.id };
+      });
+    } catch (err) {
+      console.error('[openTab] buildTab failed:', err);
+      throw err;
+    }
   },
 
   closeTab(id) {

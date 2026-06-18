@@ -9,6 +9,56 @@ interface ContentProps {
   contentRef?: React.RefObject<HTMLDivElement>;
 }
 
+/** 为代码块添加复制按钮和语言标签 */
+function enhanceCodeBlocks(container: HTMLElement) {
+  const pres = container.querySelectorAll('pre');
+  pres.forEach((pre) => {
+    // 跳过已处理的
+    if (pre.parentElement?.classList.contains('code-block-wrapper')) return;
+
+    // 检测语言
+    const code = pre.querySelector('code');
+    const langClass = code?.className || '';
+    const langMatch = langClass.match(/language-(\w+)/);
+    const lang = langMatch?.[1] || '';
+
+    // 创建包装器
+    const wrapper = document.createElement('div');
+    wrapper.className = 'code-block-wrapper';
+    pre.parentNode?.insertBefore(wrapper, pre);
+    wrapper.appendChild(pre);
+
+    // 语言标签
+    if (lang) {
+      const langLabel = document.createElement('span');
+      langLabel.className = 'code-block-lang';
+      langLabel.textContent = lang;
+      wrapper.appendChild(langLabel);
+    }
+
+    // 复制按钮
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'code-block-copy';
+    copyBtn.textContent = '复制';
+    copyBtn.addEventListener('click', async () => {
+      const text = code?.textContent || '';
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = '已复制';
+        copyBtn.classList.add('copied');
+        setTimeout(() => {
+          copyBtn.textContent = '复制';
+          copyBtn.classList.remove('copied');
+        }, 2000);
+      } catch {
+        copyBtn.textContent = '失败';
+        setTimeout(() => { copyBtn.textContent = '复制'; }, 2000);
+      }
+    });
+    wrapper.appendChild(copyBtn);
+  });
+}
+
 export function Content({ contentRef }: ContentProps) {
   const tab = useTabsStore((s) => s.tabs.find((t) => t.id === s.activeTabId));
   const setScrollTop = useTabsStore((s) => s.setScrollTop);
@@ -23,6 +73,9 @@ export function Content({ contentRef }: ContentProps) {
 
     // 注入锚点 ID
     injectAnchors(el, tab.toc);
+
+    // 增强代码块（复制按钮 + 语言标签）
+    enhanceCodeBlocks(el);
 
     // 解析图片和渲染 Mermaid
     Promise.all([

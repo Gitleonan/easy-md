@@ -9,9 +9,9 @@ export default defineConfig({
   // Tauri 不需要清屏，便于看 dev 日志
   clearScreen: false,
   server: {
-    port: 1420,
+    port: 14300,
     strictPort: true,
-    host: host || false,
+    host: host || '127.0.0.1',
     hmr: host
       ? { protocol: 'ws', host, port: 1421 }
       : undefined,
