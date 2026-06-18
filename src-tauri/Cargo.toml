@@ -2,9 +2,9 @@
 name = "app"
 version = "0.1.0"
 description = "md++ — Windows 轻量便捷的 Markdown 阅读器"
-authors = ["easy-md"]
+authors = ["leonan"]
 license = "MIT"
-repository = ""
+repository = "https://github.com/Gitleonan/easy-md"
 edition = "2021"
 rust-version = "1.77.2"
 

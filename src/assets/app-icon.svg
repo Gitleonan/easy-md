@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="md++ app icon">
+  <defs>
+    <linearGradient id="page" x1="268" y1="196" x2="756" y2="828" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.62" stop-color="#eaf3ff"/>
+      <stop offset="1" stop-color="#c9d8ea"/>
+    </linearGradient>
+    <linearGradient id="fold" x1="626" y1="198" x2="790" y2="362" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#93b5d8"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="308" y1="356" x2="732" y2="676" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#38d8ff"/>
+      <stop offset="0.52" stop-color="#1a8dff"/>
+      <stop offset="1" stop-color="#ffb84d"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#7d90a8" flood-opacity="0.28"/>
+    </filter>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#244b73" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <path d="M286 158h330l150 150v516c0 34-28 62-62 62H286c-34 0-62-28-62-62V220c0-34 28-62 62-62Z" fill="url(#page)"/>
+    <path d="M616 158v120c0 34 28 62 62 62h88L616 158Z" fill="url(#fold)"/>
+    <path d="M646 314c-18-12-30-32-30-56V158l150 150v32h-78c-15 0-29-5-42-26Z" fill="#7ea7ce" opacity="0.42"/>
+  </g>
+
+  <path d="M324 320h228" stroke="#93a8bd" stroke-width="34" stroke-linecap="round" opacity="0.42"/>
+  <path d="M324 400h376" stroke="#93a8bd" stroke-width="34" stroke-linecap="round" opacity="0.24"/>
+  <path d="M324 724h222" stroke="#93a8bd" stroke-width="34" stroke-linecap="round" opacity="0.22"/>
+
+  <g filter="url(#soft)">
+    <path d="M412 526 330 598l82 72" fill="none" stroke="url(#accent)" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M612 526 694 598l-82 72" fill="none" stroke="url(#accent)" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M530 500 480 696" fill="none" stroke="#122034" stroke-width="50" stroke-linecap="round" opacity="0.9"/>
+    <path d="M530 500 480 696" fill="none" stroke="url(#accent)" stroke-width="30" stroke-linecap="round"/>
+  </g>
+
+  <g fill="none" stroke="#ffb84d" stroke-width="34" stroke-linecap="round">
+    <path d="M698 504v92"/>
+    <path d="M652 550h92"/>
+    <path d="M770 604v80"/>
+    <path d="M730 644h80"/>
+  </g>
+</svg>

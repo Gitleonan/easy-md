@@ -1,4 +1,4 @@
-import { buildTocTree } from '../Sidebar/Sidebar';
+import { buildTocTree, filterTocTree, splitHighlightedText } from '../Sidebar/Sidebar';
 import { describe, it, expect } from 'vitest';
 
 describe('buildTocTree', () => {
@@ -26,5 +26,26 @@ describe('buildTocTree', () => {
     ];
     const tree = buildTocTree(flat);
     expect(tree).toHaveLength(2);
+  });
+
+  it('filters nodes and keeps matching descendants', () => {
+    const tree = buildTocTree([
+      { id: 'a', level: 1 as const, text: 'Intro' },
+      { id: 'b', level: 2 as const, text: 'Install Windows' },
+      { id: 'c', level: 1 as const, text: 'API' },
+    ]);
+
+    const filtered = filterTocTree(tree, 'windows');
+    expect(filtered).toHaveLength(1);
+    expect(filtered[0].text).toBe('Intro');
+    expect(filtered[0].children?.[0].text).toBe('Install Windows');
+  });
+
+  it('splits matched TOC text case-insensitively', () => {
+    expect(splitHighlightedText('Install Windows', 'win')).toEqual([
+      { text: 'Install ', match: false },
+      { text: 'Win', match: true },
+      { text: 'dows', match: false },
+    ]);
   });
 });

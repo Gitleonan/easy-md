@@ -66,7 +66,28 @@ export function clearHighlights(root: HTMLElement): void {
 /** 聚焦第 index 个匹配项（滚动到视图 + 高亮） */
 export function focusMatch(marks: HTMLElement[], index: number): void {
   marks.forEach((m, i) => m.classList.toggle(MARK_CURRENT_CLASS, i === index));
-  if (marks[index] && typeof marks[index].scrollIntoView === 'function') {
-    marks[index].scrollIntoView({ block: 'center', behavior: 'smooth' });
+  const mark = marks[index];
+  if (!mark) return;
+
+  const scroller = findScrollParent(mark);
+  if (scroller) {
+    const markRect = mark.getBoundingClientRect();
+    const scrollerRect = scroller.getBoundingClientRect();
+    const top = markRect.top - scrollerRect.top - (scroller.clientHeight / 2) + (markRect.height / 2);
+    scroller.scrollTo({ top: scroller.scrollTop + top, behavior: 'smooth' });
+  } else if (typeof mark.scrollIntoView === 'function') {
+    mark.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
+}
+
+function findScrollParent(el: HTMLElement): HTMLElement | null {
+  let current = el.parentElement;
+  while (current) {
+    const style = window.getComputedStyle(current);
+    const overflowY = style.overflowY;
+    const canScroll = /(auto|scroll|overlay)/.test(overflowY) && current.scrollHeight > current.clientHeight;
+    if (canScroll) return current;
+    current = current.parentElement;
+  }
+  return null;
 }

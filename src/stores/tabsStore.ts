@@ -1,10 +1,9 @@
 import { create } from 'zustand';
 import type { Tab, TocItem } from '../types';
-import { invoke } from '@tauri-apps/api/core';
 import { renderMarkdown } from '../features/markdown/render';
 import { highlightCodeBlocks } from '../features/markdown/highlight';
 import { extractToc } from '../features/markdown/toc';
-import { watchFiles } from '../ipc/files';
+import { readFile, watchFiles } from '../ipc/files';
 
 interface TabsState {
   tabs: Tab[];
@@ -14,12 +13,41 @@ interface TabsState {
   setActive: (id: string) => void;
   setScrollTop: (id: string, scrollTop: number) => void;
   updateSource: (id: string, source: string, html: string, toc: TocItem[]) => void;
+  reloadTab: (id: string) => Promise<void>;
+  restoreSession: () => Promise<void>;
 }
 
 let seq = 0;
+const SESSION_KEY = 'mdpp.openTabs.v1';
 
-async function readFile(path: string): Promise<string> {
-  return invoke<string>('read_text_file', { path });
+function saveSession(tabs: Tab[], activeTabId: string | null) {
+  try {
+    const activeTab = tabs.find((t) => t.id === activeTabId);
+    localStorage.setItem(
+      SESSION_KEY,
+      JSON.stringify({
+        paths: tabs.map((t) => t.filePath),
+        activePath: activeTab?.filePath ?? null,
+      }),
+    );
+  } catch {
+    // localStorage may be unavailable in tests or restricted environments.
+  }
+}
+
+function readSession(): { paths: string[]; activePath: string | null } | null {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { paths?: unknown; activePath?: unknown };
+    if (!Array.isArray(parsed.paths)) return null;
+    return {
+      paths: parsed.paths.filter((p): p is string => typeof p === 'string'),
+      activePath: typeof parsed.activePath === 'string' ? parsed.activePath : null,
+    };
+  } catch {
+    return null;
+  }
 }
 
 async function buildTab(filePath: string): Promise<Tab> {
@@ -54,6 +82,11 @@ function syncWatcherFromTabs(tabs: Tab[]) {
   });
 }
 
+function syncSessionAndWatcher(tabs: Tab[], activeTabId: string | null) {
+  saveSession(tabs, activeTabId);
+  syncWatcherFromTabs(tabs);
+}
+
 export const useTabsStore = create<TabsState>((set, get) => ({
   tabs: [],
   activeTabId: null,
@@ -74,7 +107,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       console.log('[openTab] tab built successfully:', tab.id, tab.fileName);
       set((s) => {
         const tabs = [...s.tabs, tab];
-        syncWatcherFromTabs(tabs);
+        syncSessionAndWatcher(tabs, tab.id);
         return { tabs, activeTabId: tab.id };
       });
     } catch (err) {
@@ -91,13 +124,16 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       if (activeTabId === id) {
         activeTabId = tabs[idx]?.id ?? tabs[idx - 1]?.id ?? null;
       }
-      syncWatcherFromTabs(tabs);
+      syncSessionAndWatcher(tabs, activeTabId);
       return { tabs, activeTabId };
     });
   },
 
   setActive(id) {
-    set({ activeTabId: id });
+    set((s) => {
+      saveSession(s.tabs, id);
+      return { activeTabId: id };
+    });
   },
 
   setScrollTop(id, scrollTop) {
@@ -110,5 +146,34 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     set((s) => ({
       tabs: s.tabs.map((t) => (t.id === id ? { ...t, source, html, toc } : t)),
     }));
+  },
+
+  async reloadTab(id) {
+    const tab = get().tabs.find((t) => t.id === id);
+    if (!tab) return;
+    const next = await buildTab(tab.filePath);
+    set((s) => ({
+      tabs: s.tabs.map((t) => (
+        t.id === id
+          ? { ...next, id, scrollTop: t.scrollTop, tocExpanded: t.tocExpanded }
+          : t
+      )),
+      activeTabId: s.activeTabId,
+    }));
+  },
+
+  async restoreSession() {
+    if (get().tabs.length > 0) return;
+    const session = readSession();
+    if (!session?.paths.length) return;
+    for (const path of session.paths) {
+      try {
+        await get().openTab(path);
+      } catch (err) {
+        console.error('[restoreSession] failed to reopen', path, err);
+      }
+    }
+    const active = get().tabs.find((t) => t.filePath === session.activePath);
+    if (active) get().setActive(active.id);
   },
 }));

@@ -34,4 +34,10 @@ describe('extractToc', () => {
     const toc = extractToc('# Hello World!');
     expect(toc[0].id).toBe('hello-world');
   });
+
+  it('keeps Chinese heading text addressable', () => {
+    const toc = extractToc('# 开发进度记录\n## 项目概况');
+    expect(toc[0].id).toBe('开发进度记录');
+    expect(toc[1].id).toBe('项目概况');
+  });
 });

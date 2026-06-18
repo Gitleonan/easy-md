@@ -42,6 +42,307 @@
       ]
     }
   },
-  "hotPaths": [],
+  "hotPaths": [
+    {
+      "path": "",
+      "accessCount": 6,
+      "lastAccessed": 1781751218761,
+      "type": "directory"
+    },
+    {
+      "path": "src-tauri\\Cargo.toml",
+      "accessCount": 6,
+      "lastAccessed": 1781752577014,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 3,
+      "lastAccessed": 1781752562307,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 2,
+      "lastAccessed": 1781751384452,
+      "type": "file"
+    },
+    {
+      "path": "index.html",
+      "accessCount": 1,
+      "lastAccessed": 1781751223547,
+      "type": "file"
+    },
+    {
+      "path": "vite.config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751224249,
+      "type": "file"
+    },
+    {
+      "path": "tsconfig.json",
+      "accessCount": 1,
+      "lastAccessed": 1781751224676,
+      "type": "file"
+    },
+    {
+      "path": "postcss.config.js",
+      "accessCount": 1,
+      "lastAccessed": 1781751225023,
+      "type": "file"
+    },
+    {
+      "path": "tailwind.config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751225130,
+      "type": "file"
+    },
+    {
+      "path": "LICENSE",
+      "accessCount": 1,
+      "lastAccessed": 1781751225533,
+      "type": "file"
+    },
+    {
+      "path": "src-tauri\\tauri.conf.json",
+      "accessCount": 1,
+      "lastAccessed": 1781751230557,
+      "type": "file"
+    },
+    {
+      "path": "src\\App.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1781751232864,
+      "type": "file"
+    },
+    {
+      "path": "src\\main.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1781751233664,
+      "type": "file"
+    },
+    {
+      "path": "src-tauri\\src\\lib.rs",
+      "accessCount": 1,
+      "lastAccessed": 1781751270823,
+      "type": "file"
+    },
+    {
+      "path": "src-tauri\\src\\main.rs",
+      "accessCount": 1,
+      "lastAccessed": 1781751271555,
+      "type": "file"
+    },
+    {
+      "path": "src-tauri\\src\\watcher.rs",
+      "accessCount": 1,
+      "lastAccessed": 1781751271827,
+      "type": "file"
+    },
+    {
+      "path": "src\\ipc\\files.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751272262,
+      "type": "file"
+    },
+    {
+      "path": "src\\ipc\\recent.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751273167,
+      "type": "file"
+    },
+    {
+      "path": "src\\ipc\\system.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751273752,
+      "type": "file"
+    },
+    {
+      "path": "src\\stores\\themeStore.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751273802,
+      "type": "file"
+    },
+    {
+      "path": "src\\stores\\searchStore.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751274722,
+      "type": "file"
+    },
+    {
+      "path": "src\\stores\\recentStore.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751274817,
+      "type": "file"
+    },
+    {
+      "path": "src\\types\\index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751275202,
+      "type": "file"
+    },
+    {
+      "path": "src\\features\\markdown\\plugins.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751275280,
+      "type": "file"
+    },
+    {
+      "path": "src\\features\\markdown\\render.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751275445,
+      "type": "file"
+    },
+    {
+      "path": "src\\features\\fileWatch\\useFileWatcher.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751276024,
+      "type": "file"
+    },
+    {
+      "path": "src\\hooks\\useOpenFile.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751276199,
+      "type": "file"
+    },
+    {
+      "path": "src\\hooks\\useGlobalShortcuts.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751276512,
+      "type": "file"
+    },
+    {
+      "path": "src-tauri\\capabilities\\default.json",
+      "accessCount": 1,
+      "lastAccessed": 1781751276530,
+      "type": "file"
+    },
+    {
+      "path": "src-tauri\\src\\commands\\files.rs",
+      "accessCount": 1,
+      "lastAccessed": 1781751281173,
+      "type": "file"
+    },
+    {
+      "path": "src-tauri\\src\\commands\\recent.rs",
+      "accessCount": 1,
+      "lastAccessed": 1781751282010,
+      "type": "file"
+    },
+    {
+      "path": "src-tauri\\src\\commands\\mod.rs",
+      "accessCount": 1,
+      "lastAccessed": 1781751282400,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\Content\\Content.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1781751282642,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\TitleBar\\TitleBar.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1781751283418,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\Sidebar\\Sidebar.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1781751283628,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\Welcome\\Welcome.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1781751284026,
+      "type": "file"
+    },
+    {
+      "path": "src\\features\\markdown\\highlight.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751284674,
+      "type": "file"
+    },
+    {
+      "path": "src\\features\\markdown\\toc.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751285379,
+      "type": "file"
+    },
+    {
+      "path": "src\\features\\markdown\\mermaid.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751285523,
+      "type": "file"
+    },
+    {
+      "path": "src\\features\\export\\export.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751286069,
+      "type": "file"
+    },
+    {
+      "path": "src\\features\\theme\\useThemeInit.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751286990,
+      "type": "file"
+    },
+    {
+      "path": "src\\features\\search\\search.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751287071,
+      "type": "file"
+    },
+    {
+      "path": "src\\utils\\platform.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751287188,
+      "type": "file"
+    },
+    {
+      "path": "src\\styles\\themes.css",
+      "accessCount": 1,
+      "lastAccessed": 1781751287381,
+      "type": "file"
+    },
+    {
+      "path": "src\\test\\setup.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751287497,
+      "type": "file"
+    },
+    {
+      "path": "docs\\DESIGN.md",
+      "accessCount": 1,
+      "lastAccessed": 1781751288139,
+      "type": "file"
+    },
+    {
+      "path": "scripts\\register-file-association.nsh",
+      "accessCount": 1,
+      "lastAccessed": 1781751288209,
+      "type": "file"
+    },
+    {
+      "path": "src\\features\\markdown\\anchors.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751292561,
+      "type": "file"
+    },
+    {
+      "path": "src\\features\\markdown\\rehighlight.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781751293034,
+      "type": "file"
+    },
+    {
+      "path": "docs\\PROGRESS.md",
+      "accessCount": 1,
+      "lastAccessed": 1781751293824,
+      "type": "file"
+    }
+  ],
   "userDirectives": []
 }

@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "md++ ${{ github.ref_name }}"
+          releaseBody: |
+            ## md++ ${{ github.ref_name }}
+
+            Windows 轻量便捷的 Markdown 纯阅读器。
+
+            ### 下载
+
+            - **NSIS (exe)** — 推荐，支持自动注册 `.md` 右键菜单
+            - **MSI** — 标准 Windows 安装包
+
+            ### 系统要求
+
+            Windows 10 1809+（需 WebView2 运行时，Win11 默认自带）
+          releaseDraft: true
+          prerelease: false

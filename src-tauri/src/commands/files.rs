@@ -1,6 +1,6 @@
+use base64::{engine::general_purpose, Engine as _};
 use std::fs;
 use std::path::{Path, PathBuf};
-use base64::{engine::general_purpose, Engine as _};
 
 /// 读取文件文本内容
 #[tauri::command]
@@ -40,7 +40,12 @@ pub fn resolve_local_path(md_file_path: &str, src: &str) -> PathBuf {
 
 /// 根据文件扩展名猜测 MIME 类型
 pub fn guess_mime(path: &Path) -> &'static str {
-    match path.extension().and_then(|e| e.to_str()) {
+    match path
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(|e| e.to_ascii_lowercase())
+        .as_deref()
+    {
         Some("png") => "image/png",
         Some("jpg") | Some("jpeg") => "image/jpeg",
         Some("gif") => "image/gif",

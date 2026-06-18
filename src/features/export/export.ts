@@ -1,4 +1,4 @@
-/** 生成独立 HTML 文件（用于导出 HTML / 打印 / PDF） */
+/** 生成独立 HTML 文件（用于 PDF 导出窗口） */
 export function buildStandaloneHtml(
   contentHtml: string,
   css: string,
@@ -20,38 +20,27 @@ export function buildStandaloneHtml(
 </html>`;
 }
 
-/** 调用浏览器原生打印（含"打印到 PDF"） */
-export async function printContent(el: HTMLElement, theme: 'light' | 'dark'): Promise<void> {
-  const printWin = window.open('', '_blank');
-  if (!printWin) return;
+/** 打开 PDF 导出窗口。 */
+export async function exportPdf(el: HTMLElement, theme: 'light' | 'dark'): Promise<void> {
   const full = buildStandaloneHtml(el.innerHTML, '', theme);
-  printWin.document.write(full);
-  printWin.document.close();
-  printWin.focus();
-  printWin.print();
-}
-
-/** 导出 HTML 文件 */
-export async function exportHtml(contentHtml: string, theme: 'light' | 'dark'): Promise<void> {
-  const full = buildStandaloneHtml(contentHtml, '', theme);
-  const blob = new Blob([full], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'export.html';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-/** 复制渲染后的富文本到剪贴板 */
-export async function copyRichContent(el: HTMLElement): Promise<void> {
-  const html = el.innerHTML;
-  const text = el.textContent || '';
-  const clipboardItem = new ClipboardItem({
-    'text/html': new Blob([html], { type: 'text/html' }),
-    'text/plain': new Blob([text], { type: 'text/plain' }),
-  });
-  await navigator.clipboard.write([clipboardItem]);
+  const frame = document.createElement('iframe');
+  frame.dataset.mdExportFrame = 'true';
+  frame.style.position = 'fixed';
+  frame.style.right = '0';
+  frame.style.bottom = '0';
+  frame.style.width = '0';
+  frame.style.height = '0';
+  frame.style.border = '0';
+  frame.style.opacity = '0';
+  frame.srcdoc = full;
+  frame.onload = () => {
+    const printWindow = frame.contentWindow;
+    if (!printWindow) return;
+    printWindow.focus();
+    printWindow.print();
+    setTimeout(() => frame.remove(), 1000);
+  };
+  document.body.appendChild(frame);
 }
 
 const BASE_CSS = `

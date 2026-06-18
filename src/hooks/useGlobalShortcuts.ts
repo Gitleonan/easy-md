@@ -4,7 +4,11 @@ import { useThemeStore } from '../stores/themeStore';
 import { isMac } from '../utils/platform';
 import { openViaDialog } from './useOpenFile';
 
-export function useGlobalShortcuts() {
+interface GlobalShortcutsOptions {
+  onExportPdf?: () => void;
+}
+
+export function useGlobalShortcuts(options: GlobalShortcutsOptions = {}) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const mod = isMac() ? e.metaKey : e.ctrlKey;
@@ -17,9 +21,12 @@ export function useGlobalShortcuts() {
       } else if (mod && e.key.toLowerCase() === 'o') {
         e.preventDefault();
         openViaDialog();
+      } else if (mod && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        options.onExportPdf?.();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [options.onExportPdf]);
 }

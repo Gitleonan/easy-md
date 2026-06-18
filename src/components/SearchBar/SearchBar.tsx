@@ -17,6 +17,14 @@ export function SearchBar({ contentRef }: SearchBarProps) {
     if (visible) inputRef.current?.focus();
   }, [visible]);
 
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!visible && el) {
+      clearHighlights(el);
+      setResult(0, 0);
+    }
+  }, [visible, contentRef, setResult]);
+
   // 搜索关键词变化时重新高亮
   useEffect(() => {
     const el = contentRef.current;
@@ -46,19 +54,34 @@ export function SearchBar({ contentRef }: SearchBarProps) {
 
   if (!visible) return null;
 
+  const clearKeyword = () => {
+    const el = contentRef.current;
+    if (el) clearHighlights(el);
+    setKeyword('');
+    setResult(0, 0);
+    inputRef.current?.focus();
+  };
+
   return (
     <div className="searchbar">
-      <input
-        ref={inputRef}
-        value={keyword}
-        onChange={(e) => setKeyword(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') { e.shiftKey ? prev() : next(); }
-          if (e.key === 'Escape') setVisible(false);
-        }}
-        placeholder="搜索..."
-        className="searchbar-input"
-      />
+      <div className="searchbar-input-wrap">
+        <input
+          ref={inputRef}
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') { e.shiftKey ? prev() : next(); }
+            if (e.key === 'Escape') setVisible(false);
+          }}
+          placeholder="搜索..."
+          className="searchbar-input"
+        />
+        {keyword && (
+          <button className="searchbar-clear" onClick={clearKeyword} title="清空搜索" aria-label="清空搜索">
+            ×
+          </button>
+        )}
+      </div>
       <span className="searchbar-count">
         {total > 0 ? `${current + 1}/${total}` : '0/0'}
       </span>
