@@ -32,6 +32,8 @@ Windows 下一直没有好用的 Markdown 预览工具。想快速看一眼 `.md
 
 ---
 
+![demo.png](demo.png)
+
 ## 📦 下载安装
 
 前往 [Releases](../../releases) 下载最新的 Windows 安装包（`.msi` 或 `.exe`），双击安装即可。

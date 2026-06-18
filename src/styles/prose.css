@@ -1,119 +1,246 @@
-/* GitHub-like prose typography */
-.md-content h1, .md-content h2 {
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.3em;
+/* ================================================================
+   Prose Typography — Editorial reading style
+   Clean hierarchy, generous rhythm, minimal decoration.
+   ================================================================ */
+
+/* ── Headings ────────────────────────────────────────────────── */
+
+.md-content h1, .md-content h2, .md-content h3,
+.md-content h4, .md-content h5, .md-content h6 {
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  margin-top: 1.8em;
+  margin-bottom: 0.5em;
 }
 
-.md-content h1 { font-size: 2em; margin: 0.67em 0; }
-.md-content h2 { font-size: 1.5em; margin: 1em 0 0.67em; }
-.md-content h3 { font-size: 1.25em; margin: 1em 0 0.5em; }
-.md-content h4 { font-size: 1em; margin: 1em 0 0.5em; }
-.md-content h5 { font-size: 0.875em; margin: 1em 0 0.5em; }
-.md-content h6 { font-size: 0.85em; margin: 1em 0 0.5em; color: var(--fg-muted); }
+.md-content h1:first-child,
+.md-content h2:first-child,
+.md-content h3:first-child {
+  margin-top: 0;
+}
+
+.md-content h1 {
+  font-size: 2em;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.4em;
+}
+
+.md-content h2 {
+  font-size: 1.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border);
+  margin-top: 2.2em;
+}
+
+.md-content h3 { font-size: 1.25em; }
+.md-content h4 { font-size: 1.0625em; }
+.md-content h5 { font-size: 0.9375em; }
+.md-content h6 { font-size: 0.875em; color: var(--fg-muted); }
+
+/* ── Body ────────────────────────────────────────────────────── */
+
+.md-content p {
+  margin: 0 0 1em;
+}
 
 .md-content a {
   color: var(--accent);
   text-decoration: none;
+  font-weight: 450;
+  transition: color var(--duration-fast) var(--ease-out);
 }
 
-.md-content a:hover { text-decoration: underline; }
+.md-content a:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
 
-.md-content p { margin: 0 0 16px; }
+/* 外链：缀一个 ↗ 图标，颜色稍冷一点，便于和站内链接区分 */
+.md-content a.md-link-external {
+  color: var(--link-external, #2563eb);
+  border-bottom: 1px dashed color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.md-content a.md-link-external::after {
+  content: "↗";
+  display: inline-block;
+  margin-left: 0.18em;
+  font-size: 0.85em;
+  opacity: 0.75;
+  transform: translateY(-0.05em);
+}
+
+.md-content a.md-link-external:hover {
+  border-bottom-color: var(--accent);
+  text-decoration: none;
+}
+
+:root[data-theme="dark"] .md-content a.md-link-external {
+  color: var(--link-external, #60a5fa);
+}
+
+/* md → md：加一个小书页图标，提示是站内跳转 */
+.md-content a.md-link-md::before {
+  content: "📄";
+  display: inline-block;
+  margin-right: 0.25em;
+  font-size: 0.85em;
+  opacity: 0.75;
+}
+
+.md-content a.md-link-md {
+  border-bottom: 1px dotted color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.md-content strong { font-weight: 650; }
+.md-content em { font-style: italic; }
+
+/* ── Code ────────────────────────────────────────────────────── */
 
 .md-content code:not(pre code) {
   background: var(--code-bg);
-  padding: 0.2em 0.4em;
-  border-radius: 6px;
-  font-size: 0.9em;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-size: 0.88em;
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 450;
 }
 
 .md-content pre {
   background: var(--code-bg);
-  padding: 16px;
-  border-radius: 6px;
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
   overflow: auto;
   margin: 0 0 16px;
+  font-size: 0.85em;
+  line-height: 1.65;
 }
 
 .md-content pre code {
   background: none;
   padding: 0;
   border-radius: 0;
-  font-size: 0.85em;
+  font-size: 1em;
+  font-weight: 400;
 }
 
+/* ── Blockquote ──────────────────────────────────────────────── */
+
 .md-content blockquote {
-  border-left: 4px solid var(--border);
-  padding: 0 16px;
+  border-left: 3px solid var(--accent);
+  padding: 0.5em 16px;
   color: var(--fg-muted);
-  margin: 0 0 16px;
+  margin: 0 0 1em;
+  background: var(--accent-soft);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
+
+.md-content blockquote p:last-child { margin-bottom: 0; }
+
+/* ── Table ───────────────────────────────────────────────────── */
 
 .md-content table {
   border-collapse: collapse;
-  margin: 0 0 16px;
+  margin: 0 0 1em;
   width: 100%;
+  font-size: 0.9375em;
 }
 
 .md-content th, .md-content td {
-  border: 1px solid var(--border);
-  padding: 6px 13px;
+  padding: 8px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
 }
 
 .md-content th {
   background: var(--bg-secondary);
   font-weight: 600;
+  font-size: 0.875em;
 }
 
-.md-content img {
-  max-width: 100%;
-  cursor: zoom-in;
-  border-radius: 4px;
-}
+.md-content tr:last-child td { border-bottom: none; }
 
-.md-content mark {
-  background: var(--mark-bg);
-  padding: 0.1em 0.2em;
-  border-radius: 3px;
-}
-
-.md-content input[type="checkbox"] {
-  margin-right: 0.5em;
-}
+/* ── Lists ───────────────────────────────────────────────────── */
 
 .md-content ul, .md-content ol {
-  padding-left: 2em;
-  margin: 0 0 16px;
+  padding-left: 1.5em;
+  margin: 0 0 1em;
 }
 
 .md-content li + li {
   margin-top: 0.25em;
 }
 
-.md-content hr {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 24px 0;
+.md-content li > p {
+  margin: 0;
 }
 
-/* 脚注 */
+.md-content li > ul,
+.md-content li > ol {
+  margin-top: 0.25em;
+  margin-bottom: 0;
+}
+
+/* ── Horizontal Rule ─────────────────────────────────────────── */
+
+.md-content hr {
+  border: none;
+  height: 1px;
+  background: var(--border);
+  margin: 2.5em 0;
+}
+
+/* ── Images ──────────────────────────────────────────────────── */
+
+.md-content img {
+  max-width: 100%;
+  cursor: zoom-in;
+  border-radius: var(--radius-md);
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.md-content img:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Mark ────────────────────────────────────────────────────── */
+
+.md-content mark {
+  background: var(--mark-bg);
+  padding: 0.05em 0.2em;
+  border-radius: 3px;
+}
+
+/* ── Checkbox ────────────────────────────────────────────────── */
+
+.md-content input[type="checkbox"] {
+  margin-right: 0.5em;
+  accent-color: var(--accent);
+}
+
+/* ── Footnotes ───────────────────────────────────────────────── */
+
 .md-content .footnotes {
-  font-size: 0.9em;
+  font-size: 0.875em;
   color: var(--fg-muted);
   border-top: 1px solid var(--border);
   padding-top: 1em;
-  margin-top: 2em;
+  margin-top: 2.5em;
 }
 
-/* Mermaid */
+/* ── Mermaid ─────────────────────────────────────────────────── */
+
 .md-content .mermaid {
   text-align: center;
-  margin: 16px 0;
+  margin: 1.5em 0;
 }
 
-/* KaTeX */
+/* ── KaTeX ───────────────────────────────────────────────────── */
+
 .md-content .katex-display {
-  margin: 16px 0;
+  margin: 1.5em 0;
   overflow-x: auto;
 }

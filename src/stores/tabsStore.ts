@@ -103,7 +103,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       return;
     }
     try {
-      const tab = await buildTab(filePath);
+      const tab = await buildTab(normalized);
       console.log('[openTab] tab built successfully:', tab.id, tab.fileName);
       set((s) => {
         const tabs = [...s.tabs, tab];
@@ -173,7 +173,10 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         console.error('[restoreSession] failed to reopen', path, err);
       }
     }
-    const active = get().tabs.find((t) => t.filePath === session.activePath);
+    const normalizedActive = session.activePath?.replace(/\//g, '\\');
+    const active = get().tabs.find(
+      (t) => t.filePath === normalizedActive || t.filePath === session.activePath,
+    );
     if (active) get().setActive(active.id);
   },
 }));

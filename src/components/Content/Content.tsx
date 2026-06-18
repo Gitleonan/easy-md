@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { useTabsStore } from '../../stores/tabsStore';
 import { resolveImages } from '../../ipc/files';
+import { openExternalUrl, openLocalPath } from '../../ipc/opener';
 import { renderMermaidInContainer } from '../../features/markdown/mermaid';
 import { injectAnchors } from '../../features/markdown/anchors';
+import { classifyLink, resolveLocalPath } from '../../features/markdown/links';
 import { useLightbox } from '../../hooks/useLightbox';
 
 interface ContentProps {
@@ -91,13 +93,21 @@ function enhanceCodeBlocks(container: HTMLElement) {
 }
 
 export function Content({ contentRef, onActiveHeadingChange }: ContentProps) {
-  const tab = useTabsStore((s) => s.tabs.find((t) => t.id === s.activeTabId));
+  // 仅订阅会改变渲染结果的字段，避免滚动时 setScrollTop 触发本组件重渲染——
+  // 否则下面的 useEffect 会因为 tab 引用变化重新跑，把 el.innerHTML 重置一次，
+  // 顺手抹掉 SearchBar 刚加上的 <mark>，导致一次性输入多个字时高亮“看似没出现”。
+  const tabId = useTabsStore((s) => s.activeTabId);
+  const tabHtml = useTabsStore((s) => s.tabs.find((t) => t.id === s.activeTabId)?.html);
+  const tabSource = useTabsStore((s) => s.tabs.find((t) => t.id === s.activeTabId)?.source);
   const setScrollTop = useTabsStore((s) => s.setScrollTop);
   const internalRef = useRef<HTMLDivElement>(null);
   const ref = contentRef || internalRef;
 
   useEffect(() => {
-    if (!ref.current || !tab) return;
+    if (!ref.current || !tabId || tabHtml == null) return;
+    // 通过 getState 读取，避免把 tab 整体写进 deps 而被滚动期间的引用刷新带歪。
+    const tab = useTabsStore.getState().tabs.find((t) => t.id === tabId);
+    if (!tab) return;
     const el = ref.current;
     el.innerHTML = tab.html;
     el.scrollTop = tab.scrollTop;
@@ -130,6 +140,39 @@ export function Content({ contentRef, onActiveHeadingChange }: ContentProps) {
       imgHandlers.push(() => img.removeEventListener('click', h));
     });
 
+    // 链接点击拦截：md 链接打开新 tab、外链丢给系统浏览器、其它本地路径走 opener
+    const onLinkClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      const a = target?.closest?.('a');
+      if (!a) return;
+      const href = a.getAttribute('href');
+      if (!href) return;
+      const link = classifyLink(href);
+      if (link.kind === 'anchor') {
+        // 走 webview 默认行为，配合 .md-content 的 scroll-behavior 平滑滚动
+        return;
+      }
+      e.preventDefault();
+      if (link.kind === 'external') {
+        openExternalUrl(link.url).catch((err) => console.error('[link] openUrl failed', err));
+        return;
+      }
+      if (link.kind === 'mdFile') {
+        const resolved = resolveLocalPath(tab.filePath, link.path);
+        useTabsStore
+          .getState()
+          .openTab(resolved)
+          .catch((err) => console.error('[link] openTab failed', err));
+        return;
+      }
+      if (link.kind === 'localFile') {
+        const resolved = resolveLocalPath(tab.filePath, link.path);
+        openLocalPath(resolved).catch((err) => console.error('[link] openPath failed', err));
+        return;
+      }
+    };
+    el.addEventListener('click', onLinkClick);
+
     const syncActiveHeading = () => {
       onActiveHeadingChange?.(getActiveHeadingId(el));
     };
@@ -145,22 +188,22 @@ export function Content({ contentRef, onActiveHeadingChange }: ContentProps) {
     return () => {
       cancelled = true;
       el.removeEventListener('scroll', onScroll);
+      el.removeEventListener('click', onLinkClick);
       imgHandlers.forEach((fn) => fn());
     };
   }, [
-    tab?.id,
-    tab?.html,
+    tabId,
+    tabHtml,
     setScrollTop,
-    tab,
     ref,
     onActiveHeadingChange,
   ]);
 
-  if (!tab) return null;
+  if (!tabId || tabHtml == null) return null;
   return (
     <div className="content-shell">
       <main className="md-content" ref={ref} />
-      <div className="word-count-badge">字数 {countMarkdownWords(tab.source)}</div>
+      <div className="word-count-badge">字数 {countMarkdownWords(tabSource ?? '')}</div>
     </div>
   );
 }

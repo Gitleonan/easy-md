@@ -21,7 +21,7 @@ describe('tabsStore', () => {
     const s = useTabsStore.getState();
     expect(s.tabs).toHaveLength(1);
     expect(s.tabs[0].fileName).toBe('a.md');
-    expect(s.tabs[0].filePath).toBe('C:/a.md');
+    expect(s.tabs[0].filePath).toBe('C:\\a.md');
     expect(s.activeTabId).toBe(s.tabs[0].id);
   });
 
@@ -55,8 +55,8 @@ describe('tabsStore', () => {
     useTabsStore.getState().setActive(firstId);
 
     expect(JSON.parse(localStorage.getItem('mdpp.openTabs.v1') || '{}')).toEqual({
-      paths: ['C:/a.md', 'C:/b.md'],
-      activePath: 'C:/a.md',
+      paths: ['C:\\a.md', 'C:\\b.md'],
+      activePath: 'C:\\a.md',
     });
   });
 
@@ -107,7 +107,7 @@ describe('tabsStore', () => {
     await useTabsStore.getState().restoreSession();
 
     const s = useTabsStore.getState();
-    expect(s.tabs.map((t) => t.filePath)).toEqual(['C:/a.md', 'C:/b.md']);
-    expect(s.tabs.find((t) => t.id === s.activeTabId)?.filePath).toBe('C:/b.md');
+    expect(s.tabs.map((t) => t.filePath)).toEqual(['C:\\a.md', 'C:\\b.md']);
+    expect(s.tabs.find((t) => t.id === s.activeTabId)?.filePath).toBe('C:\\b.md');
   });
 });

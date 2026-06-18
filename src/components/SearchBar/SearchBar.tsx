@@ -25,7 +25,13 @@ export function SearchBar({ contentRef }: SearchBarProps) {
     }
   }, [visible, contentRef, setResult]);
 
-  // 搜索关键词变化时重新高亮
+  // 获取当前 tab 的 html，用于感知内容变化
+  const tabHtml = useTabsStore((s) => {
+    const active = s.tabs.find((t) => t.id === s.activeTabId);
+    return active?.html;
+  });
+
+  // 搜索关键词或内容变化时重新高亮
   useEffect(() => {
     const el = contentRef.current;
     if (!el) return;
@@ -34,15 +40,20 @@ export function SearchBar({ contentRef }: SearchBarProps) {
       setResult(0, 0);
       return;
     }
-    const total = highlightMatches(el, keyword);
-    if (total > 0) {
-      const marks = Array.from(el.querySelectorAll<HTMLElement>('mark.search-mark'));
-      focusMatch(marks, 0);
-      setResult(total, 0);
-    } else {
-      setResult(0, 0);
-    }
-  }, [keyword, activeTabId, contentRef, setResult]);
+    // 等 DOM 更新完毕后再搜索
+    requestAnimationFrame(() => {
+      const el = contentRef.current;
+      if (!el) return;
+      const total = highlightMatches(el, keyword);
+      if (total > 0) {
+        const marks = Array.from(el.querySelectorAll<HTMLElement>('mark.search-mark'));
+        focusMatch(marks, 0);
+        setResult(total, 0);
+      } else {
+        setResult(0, 0);
+      }
+    });
+  }, [keyword, activeTabId, tabHtml, contentRef, setResult]);
 
   // 当前匹配项变化时聚焦
   useEffect(() => {

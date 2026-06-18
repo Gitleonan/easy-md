@@ -41,6 +41,6 @@ coverage/
 *.tsbuildinfo
 
 # Agent/IDE local state
-.omc/
+.omc
 .omx/
 CLAUDE.md

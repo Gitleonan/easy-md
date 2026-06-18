@@ -6,6 +6,7 @@ import { Content } from './components/Content/Content';
 import { Welcome } from './components/Welcome/Welcome';
 import { SearchBar } from './components/SearchBar/SearchBar';
 import { Lightbox } from './components/Lightbox/Lightbox';
+import { ExportPdfModal } from './components/ExportPdfModal/ExportPdfModal';
 import { useTabsStore } from './stores/tabsStore';
 import { useOpenFile } from './hooks/useOpenFile';
 import { useThemeInit } from './features/theme/useThemeInit';
@@ -17,6 +18,7 @@ import { exportPdf } from './features/export/export';
 
 export default function App() {
   const [activeHeadingId, setActiveHeadingId] = useState<string | null>(null);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
 
   useOpenFile();
   useThemeInit();
@@ -30,12 +32,20 @@ export default function App() {
 
   const loadRecent = useRecentStore((s) => s.load);
   const restoreSession = useTabsStore((s) => s.restoreSession);
-  const exportCurrentPdf = useCallback(() => {
+
+  // 把“点击导出”和“真正调起打印”分开：先弹应用层 modal，再由用户确认后调起系统打印对话框，
+  // 避免两层弹窗在视觉上糊在一起。
+  const requestExportPdf = useCallback(() => {
     if (!contentRef.current) return;
-    void exportPdf(contentRef.current, resolvedTheme);
+    setExportModalOpen(true);
+  }, []);
+
+  const performExportPdf = useCallback(async () => {
+    if (!contentRef.current) return;
+    await exportPdf(contentRef.current, resolvedTheme);
   }, [resolvedTheme]);
 
-  useGlobalShortcuts({ onExportPdf: exportCurrentPdf });
+  useGlobalShortcuts({ onExportPdf: requestExportPdf });
 
   // 恢复刷新前打开的标签，避免 WebView 右键刷新后回到空状态。
   useEffect(() => {
@@ -58,7 +68,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <TitleBar onExportPdf={exportCurrentPdf} />
+      <TitleBar onExportPdf={requestExportPdf} />
       {hasTabs && activeTab && <SearchBar contentRef={contentRef} />}
       <div className="app-body">
         {hasTabs && activeTab && <Sidebar toc={activeTab.toc} activeId={activeHeadingId} />}
@@ -69,6 +79,12 @@ export default function App() {
         )}
       </div>
       <Lightbox />
+      <ExportPdfModal
+        open={exportModalOpen}
+        fileName={activeTab?.fileName ?? null}
+        onConfirm={performExportPdf}
+        onClose={() => setExportModalOpen(false)}
+      />
     </div>
   );
 }
