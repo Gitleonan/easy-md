@@ -4,6 +4,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { renderMarkdown } from '../features/markdown/render';
 import { highlightCodeBlocks } from '../features/markdown/highlight';
 import { extractToc } from '../features/markdown/toc';
+import { watchFiles } from '../ipc/files';
 
 interface TabsState {
   tabs: Tab[];
@@ -40,6 +41,14 @@ async function buildTab(filePath: string): Promise<Tab> {
   };
 }
 
+/** 同步标签页路径到 Rust watcher，让外部编辑时能自动刷新 */
+function syncWatcherFromTabs(tabs: Tab[]) {
+  const paths = tabs.map((t) => t.filePath);
+  watchFiles(paths).catch(() => {
+    // 忽略：Tauri 命令可能还没注册（开发时前端先启动）
+  });
+}
+
 export const useTabsStore = create<TabsState>((set, get) => ({
   tabs: [],
   activeTabId: null,
@@ -54,7 +63,11 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       return;
     }
     const tab = await buildTab(filePath);
-    set((s) => ({ tabs: [...s.tabs, tab], activeTabId: tab.id }));
+    set((s) => {
+      const tabs = [...s.tabs, tab];
+      syncWatcherFromTabs(tabs);
+      return { tabs, activeTabId: tab.id };
+    });
   },
 
   closeTab(id) {
@@ -65,6 +78,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       if (activeTabId === id) {
         activeTabId = tabs[idx]?.id ?? tabs[idx - 1]?.id ?? null;
       }
+      syncWatcherFromTabs(tabs);
       return { tabs, activeTabId };
     });
   },

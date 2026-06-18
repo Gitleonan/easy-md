@@ -11,12 +11,14 @@ import { useTabsStore } from './stores/tabsStore';
 import { useOpenFile } from './hooks/useOpenFile';
 import { useThemeInit } from './features/theme/useThemeInit';
 import { useGlobalShortcuts } from './hooks/useGlobalShortcuts';
+import { useFileWatcher } from './features/fileWatch/useFileWatcher';
 import { useRecentStore } from './stores/recentStore';
 
 export default function App() {
   useOpenFile();
   useThemeInit();
   useGlobalShortcuts();
+  useFileWatcher();
 
   const contentRef = useRef<HTMLDivElement>(null);
   const hasTabs = useTabsStore((s) => s.tabs.length > 0);

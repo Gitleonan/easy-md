@@ -29,3 +29,8 @@ export async function resolveImages(container: HTMLElement, mdFilePath: string):
 
 const PLACEHOLDER =
   'data:image/svg+xml;base64,PHN2Zz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZWVlIi8+PC9zdmc+';
+
+/** 设置要监听的文件路径列表（调用 Rust watch_files 命令） */
+export async function watchFiles(paths: string[]): Promise<void> {
+  await invoke('watch_files', { paths });
+}
