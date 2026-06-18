@@ -1,7 +1,7 @@
 mod commands;
 mod watcher;
 
-use tauri::{Emitter, Manager};
+use tauri::Emitter;
 use watcher::WatcherState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

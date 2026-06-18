@@ -4,7 +4,7 @@ use tauri::{AppHandle, Emitter, Manager};
 
 /// 全局 watcher 状态，保活防止被 drop
 pub struct WatcherState {
-    pub watcher: Mutex<Option<notify_debouncer_mini::Debouncer<notify::FsEventWatcher>>>,
+    pub watcher: Mutex<Option<notify_debouncer_mini::Debouncer<notify::RecommendedWatcher>>>,
     pub watched_paths: Mutex<Vec<String>>,
 }
 
