@@ -16,6 +16,11 @@ export async function openContainingFolder(path: string): Promise<void> {
   await invoke('open_containing_folder', { path });
 }
 
+/** 检查是否为 .md 文件的默认打开程序 */
+export async function checkFileAssociation(): Promise<boolean> {
+  return invoke<boolean>('check_file_association');
+}
+
 /** 注册为 .md / .markdown 文件的默认打开方式 */
 export async function registerFileAssociation(): Promise<void> {
   await invoke('register_file_association');

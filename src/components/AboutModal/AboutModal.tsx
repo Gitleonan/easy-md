@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { openExternalUrl, registerFileAssociation } from '../../ipc/opener';
+import { useState, useCallback, useEffect } from 'react';
+import { openExternalUrl, registerFileAssociation, checkFileAssociation } from '../../ipc/opener';
 import { writeFile, getAppDataDir } from '../../ipc/files';
 import { useTabsStore } from '../../stores/tabsStore';
 import appIcon from '../../assets/app-icon.svg';
@@ -17,6 +17,21 @@ export function AboutModal({ open, onClose }: AboutModalProps) {
   const [debug, setDebug] = useState(() => localStorage.getItem('mdpp.debug') === 'true');
   const [openingFeatures, setOpeningFeatures] = useState(false);
   const [settingDefault, setSettingDefault] = useState(false);
+  const [setDefaultMsg, setSetDefaultMsg] = useState<string | null>(null);
+  const [isDefaultHandler, setIsDefaultHandler] = useState(true); // 默认 true 避免闪烁
+  const [checkingDefault, setCheckingDefault] = useState(false);
+
+  // 每次打开关于窗口时检测是否为默认 MD 阅读器
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    setCheckingDefault(true);
+    checkFileAssociation()
+      .then((isDefault) => { if (!cancelled) setIsDefaultHandler(isDefault); })
+      .catch(() => { if (!cancelled) setIsDefaultHandler(false); })
+      .finally(() => { if (!cancelled) setCheckingDefault(false); });
+    return () => { cancelled = true; };
+  }, [open]);
 
   const openFeatures = useCallback(async () => {
     if (openingFeatures) return;
@@ -36,10 +51,15 @@ export function AboutModal({ open, onClose }: AboutModalProps) {
   const handleSetDefault = useCallback(async () => {
     if (settingDefault) return;
     setSettingDefault(true);
+    setSetDefaultMsg(null);
     try {
       await registerFileAssociation();
+      setIsDefaultHandler(true);
+      setSetDefaultMsg('已设为默认 MD 阅读器');
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
       console.error('[AboutModal] registerFileAssociation failed:', err);
+      setSetDefaultMsg(`设置失败: ${msg}`);
     } finally {
       setSettingDefault(false);
     }
@@ -93,13 +113,26 @@ export function AboutModal({ open, onClose }: AboutModalProps) {
             </div>
             <div className="about-row">
               <span className="about-label">默认打开</span>
-              <button
-                className="about-link"
-                onClick={handleSetDefault}
-                disabled={settingDefault}
-              >
-                {settingDefault ? '设置中…' : '设为 MD 默认阅读器'}
-              </button>
+              {checkingDefault ? (
+                <span className="about-value">检测中…</span>
+              ) : isDefaultHandler ? (
+                <span className="about-value" style={{ color: '#4caf50' }}>已设为默认 Markdown 阅读器</span>
+              ) : (
+                <>
+                  <button
+                    className="about-link"
+                    onClick={handleSetDefault}
+                    disabled={settingDefault}
+                  >
+                    {settingDefault ? '设置中…' : '设为 MD 默认阅读器'}
+                  </button>
+                  {setDefaultMsg && (
+                    <span className={`about-msg ${setDefaultMsg.startsWith('已') ? 'success' : 'error'}`}>
+                      {setDefaultMsg}
+                    </span>
+                  )}
+                </>
+              )}
             </div>
             <div className="about-row">
               <span className="about-label">调试模式</span>

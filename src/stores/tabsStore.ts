@@ -4,6 +4,7 @@ import { renderMarkdown } from '../features/markdown/render';
 import { highlightCodeBlocks } from '../features/markdown/highlight';
 import { extractToc } from '../features/markdown/toc';
 import { readFile, watchFiles } from '../ipc/files';
+import { isMac } from '../utils/platform';
 
 interface TabsState {
   tabs: Tab[];
@@ -25,13 +26,20 @@ let seq = 0;
 const SESSION_KEY = 'mdpp.openTabs.v1';
 
 /**
- * 路径比较归一化：把斜杠统一为反斜杠并转小写。
- * Windows 文件系统大小写不敏感，但 JS 字符串 === 是大小写敏感的，
- * 不归一化会导致 `C:\Foo.md` 与 `c:\foo.md` 被误判为不同文件，
- * 进而让"已打开则激活"的去重逻辑失效。
+ * 路径比较归一化：统一分隔符并转小写用于去重。
+ * Windows: 反斜杠 + 大小写不敏感 → 统一为反斜杠小写
+ * macOS:   正斜杠 + HFS/APFS 默认大小写不敏感 → 仅转小写
+ * Linux:   正斜杠 + 大小写敏感 → 保留原样
  */
 function normalizePathKey(p: string): string {
+  if (isMac()) {
+    return p.toLowerCase();
+  }
   return p.replace(/\//g, '\\').replace(/\\+/g, '\\').toLowerCase();
+}
+
+function isWindows(): boolean {
+  return !isMac();
 }
 
 function saveSession(tabs: Tab[], activeTabId: string | null) {
@@ -108,7 +116,8 @@ export const useTabsStore = create<TabsState>((set, get) => ({
 
   async openTab(filePath) {
     console.log('[openTab] called with:', filePath);
-    const normalized = filePath.replace(/\//g, '\\');
+    // Windows 路径归一化：统一使用反斜杠分隔符；macOS/Linux 保留正斜杠
+    const normalized = isWindows() ? filePath.replace(/\//g, '\\') : filePath;
     const targetKey = normalizePathKey(filePath);
     const existing = get().tabs.find(
       (t) => normalizePathKey(t.filePath) === targetKey,

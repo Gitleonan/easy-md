@@ -10,6 +10,7 @@ import {
 import freshCss from '../themes/fresh.css?raw';
 import midnightCss from '../themes/midnight.css?raw';
 import scholarlyCss from '../themes/scholarly.css?raw';
+import tahoeCss from '../themes/tahoe.css?raw';
 
 const STORAGE_KEY = 'mdpp.activeCustomTheme';
 const BUILTIN_KEY = 'mdpp.activeBuiltinTheme';
@@ -26,6 +27,7 @@ export const BUILTIN_THEMES: BuiltinTheme[] = [
   { id: 'fresh',     name: 'Fresh',     nameZh: '清新',  css: freshCss },
   { id: 'midnight',  name: 'Midnight',  nameZh: '午夜',  css: midnightCss },
   { id: 'scholarly', name: 'Scholarly', nameZh: '学术',  css: scholarlyCss },
+  { id: 'tahoe',     name: 'Tahoe',     nameZh: 'Tahoe', css: tahoeCss },
 ];
 
 interface CustomThemeState {

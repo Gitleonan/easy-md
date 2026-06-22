@@ -1,0 +1,406 @@
+/*
+ * md++ 内置主题：Tahoe (macOS 26 Liquid Glass)
+ *
+ * macOS 原生优化的阅读体验：
+ * - SF Pro Display + SF Pro Text + SF Mono 系统字体链
+ * - macOS 大标题/标题排版体系，适配系统字体渲染
+ * - 亮色页面 + 深色代码块（Xcode Dark 风格），暗色滚动条与悬浮按钮
+ * - Liquid Glass 毛玻璃质感
+ * - 仅作用于 .md-content / .code-block-*，不污染其他预设
+ */
+
+/* ── CSS 变量：亮色模式 ───────────────────── */
+:root {
+  --bg: #eef2fa;
+  --bg-secondary: #e4eaf5;
+  --surface-raised: rgba(255, 255, 255, 0.82);
+  --fg: #1a2744;
+  --fg-muted: #5e6d8a;
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.08);
+  --accent-hover: #1d4ed8;
+  --border: rgba(0, 0, 0, 0.07);
+
+  /* ── 代码块：Xcode Dark 风格深色底 ── */
+  --code-bg: #1e2235;
+  --code-inline-bg: rgba(37, 99, 235, 0.1);
+  --code-inline-fg: #2563eb;
+  --code-inline-border: rgba(37, 99, 235, 0.15);
+  --code-line-number: rgba(200, 210, 235, 0.6);
+  --code-line-divider: rgba(255, 255, 255, 0.06);
+  --code-line-highlight: rgba(255, 255, 255, 0.06);
+  --code-line-error: rgba(255, 100, 120, 0.12);
+  --code-line-warning: rgba(255, 200, 60, 0.12);
+  --code-line-diff-add: rgba(80, 220, 160, 0.12);
+  --code-line-diff-add-symbol: #50dca0;
+  --code-line-diff-remove: rgba(255, 100, 120, 0.12);
+  --code-line-diff-remove-symbol: #ff6478;
+
+  --mark-linear-color: #7db0ff;
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.09);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-blur: 20px;
+  --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Menlo', 'Consolas', 'JetBrains Mono',
+    'Liberation Mono', monospace;
+}
+
+/* ── CSS 变量：暗色模式 ───────────────────── */
+:root[data-theme="dark"] {
+  --bg: #0c1020;
+  --bg-secondary: #111628;
+  --surface-raised: rgba(24, 30, 52, 0.75);
+  --fg: #dce2f0;
+  --fg-muted: #7c89aa;
+  --accent: #6b9aff;
+  --accent-soft: rgba(107, 154, 255, 0.1);
+  --accent-hover: #8db4ff;
+  --border: rgba(255, 255, 255, 0.06);
+
+  /* 暗色模式：代码块略亮于背景 */
+  --code-bg: #141a30;
+  --code-inline-bg: rgba(107, 154, 255, 0.1);
+  --code-inline-fg: #6b9aff;
+  --code-inline-border: rgba(107, 154, 255, 0.15);
+  --code-line-number: rgba(220, 226, 240, 0.55);
+  --code-line-divider: rgba(255, 255, 255, 0.06);
+  --code-line-highlight: rgba(255, 255, 255, 0.05);
+  --code-line-error: rgba(255, 100, 120, 0.15);
+  --code-line-warning: rgba(255, 200, 60, 0.15);
+  --code-line-diff-add: rgba(80, 220, 160, 0.15);
+  --code-line-diff-add-symbol: #50dca0;
+  --code-line-diff-remove: rgba(255, 100, 120, 0.15);
+  --code-line-diff-remove-symbol: #ff6478;
+
+  --mark-linear-color: #2b5090;
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.45);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --glass-bg: rgba(16, 20, 40, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-blur: 24px;
+  --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Menlo', 'Consolas', 'JetBrains Mono',
+    'Liberation Mono', monospace;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   macOS 排版系统
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── 正文基准：SF Pro Text ─────────────────── */
+
+.md-content {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+/* ── 标题：SF Pro Display + macOS 层级 ─────── */
+
+.md-content h1,
+.md-content h2,
+.md-content h3,
+.md-content h4,
+.md-content h5,
+.md-content h6 {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: var(--fg);
+  font-weight: 600;
+  overflow-wrap: break-word;
+  outline: none;
+}
+
+/* macOS Large Title */
+.md-content h1 {
+  font-size: 32px;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-top: 1.2em;
+  margin-bottom: 0.35em;
+}
+
+/* macOS Title 1 */
+.md-content h2 {
+  font-size: 26px;
+  line-height: 1.3;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  padding-top: 20px;
+  margin: 36px 0 12px;
+  border-top: 1px solid var(--border);
+  transition: border-top var(--t-color), color var(--t-color);
+}
+
+.md-content h2:first-of-type {
+  padding-top: 8px;
+  margin-top: 20px;
+  border-top: none;
+}
+
+/* macOS Title 2 */
+.md-content h3 {
+  font-size: 21px;
+  line-height: 1.35;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 32px 0 16px;
+}
+
+/* macOS Title 3 */
+.md-content h4 {
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 24px 0 14px;
+}
+
+/* macOS Headline */
+.md-content h5 {
+  font-size: 16px;
+  line-height: 1.45;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  margin: 24px 0 14px;
+}
+
+/* macOS Subheadline (muted) */
+.md-content h6 {
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 600;
+  letter-spacing: 0;
+  margin: 24px 0 14px;
+  color: var(--fg-muted);
+}
+
+/* ── 正文段落 ─────────────────────────────── */
+
+.md-content p {
+  margin: 16px 0;
+  line-height: 1.75;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   行内代码：macOS 标签风格
+   ════════════════════════════════════════════════════════════════ */
+
+.md-content :not(pre, h1, h2, h3, h4, h5, h6) > code {
+  font-size: 0.875em;
+  color: var(--code-inline-fg);
+  transition: color var(--t-color);
+}
+
+.md-content :not(pre) > code {
+  padding: 2px 7px;
+  background-color: var(--code-inline-bg);
+  border: 0.5px solid var(--code-inline-border);
+  border-radius: 5px;
+  font-family: 'SF Mono', Menlo, 'JetBrains Mono', monospace;
+  font-weight: 400;
+  font-size: 0.875em;
+  transition: color var(--t-color), background-color var(--t-color),
+    border-color var(--t-color);
+  word-break: break-word;
+  vertical-align: 0.05em;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   代码块：Xcode Dark 风格
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── 覆盖 Shiki github-light 内联色 → github-dark 色调 ── */
+.md-content pre.shiki,
+.md-content pre.shiki code {
+  color: #abb2bf !important;
+}
+.md-content pre.shiki .shiki span {
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+  color: var(--shiki-dark) !important;
+}
+
+/* ── macOS 交通灯圆点 ── */
+.md-content .code-block-wrapper:not(.has-title):not(.line-numbers-mode)::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  z-index: 5;
+  width: 52px;
+  height: 10px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle 5px at 0 50%, #ff5f57 100%, transparent 0),
+    radial-gradient(circle 5px at 18px 50%, #febc2e 100%, transparent 0),
+    radial-gradient(circle 5px at 36px 50%, #28c840 100%, transparent 0);
+}
+
+/* ── 代码块容器：macOS 阴影 + 圆角 ── */
+.md-content .code-block-wrapper {
+  margin: 20px 0;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: box-shadow var(--t-color);
+}
+
+.md-content .code-block-wrapper pre {
+  border-radius: 10px;
+}
+
+/* 无标题代码块：为交通灯圆点让出空间 */
+.md-content .code-block-wrapper:not(.has-title):not(.line-numbers-mode) pre.shiki {
+  padding-top: 36px;
+}
+
+.md-content .code-block-wrapper.has-title {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.md-content .code-block-wrapper.has-title pre {
+  border-radius: 0 0 10px 10px;
+}
+
+/* ── 代码块标题：浅色文字在深色底上 ── */
+.md-content .code-block-title {
+  color: #abb2bf;
+  background: var(--code-bg);
+  border-bottom: 1px solid var(--code-line-divider);
+}
+
+/* ── 深色代码块内的系统滚动条 ── */
+.md-content .code-block-wrapper pre::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.md-content .code-block-wrapper pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+.md-content .code-block-wrapper pre::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+}
+.md-content .code-block-wrapper pre::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* ── 复制按钮：深色半透明悬浮 ── */
+.md-content .code-block-copy {
+  background: rgba(30, 34, 53, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  z-index: 11;
+}
+.md-content .code-block-copy:hover {
+  background: rgba(30, 34, 53, 0.95);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.md-content .code-block-copy.copied {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(37, 99, 235, 0.2);
+}
+
+/* ── 语言标签 ── */
+.md-content .code-block-lang {
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+.md-content .code-block-wrapper:hover .code-block-lang {
+  opacity: 0.8;
+}
+
+/* ── 行号在深色代码块上使用浅色 ── */
+.md-content .line-numbers {
+  color: var(--code-line-number);
+  border-right: 1px solid var(--code-line-divider);
+}
+
+.md-content .code-block-wrapper.line-numbers-mode .line-numbers .line-number {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 深色代码块的行高亮 / diff 颜色适配 ── */
+.md-content pre.shiki .code-line-highlight {
+  background: var(--code-line-highlight);
+}
+.md-content pre.shiki .code-line-add {
+  background: var(--code-line-diff-add);
+}
+.md-content pre.shiki .code-line-add::before {
+  color: var(--code-line-diff-add-symbol);
+}
+.md-content pre.shiki .code-line-remove {
+  background: var(--code-line-diff-remove);
+}
+.md-content pre.shiki .code-line-remove::before {
+  color: var(--code-line-diff-remove-symbol);
+}
+
+/* ── 等宽字体设置（代码块内） ── */
+.md-content pre,
+.md-content pre code {
+  font-family: var(--font-mono);
+  font-feature-settings: 'liga' 1, 'calt' 1;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   引用块：Liquid Glass 毛玻璃
+   ════════════════════════════════════════════════════════════════ */
+
+.md-content blockquote {
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-left: 3px solid var(--accent);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   选中高亮：macOS accent
+   ════════════════════════════════════════════════════════════════ */
+
+.md-content ::selection {
+  background: rgba(37, 99, 235, 0.2);
+}
+
+:root[data-theme="dark"] .md-content ::selection {
+  background: rgba(107, 154, 255, 0.25);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   缩写：macOS 点状下划线
+   ════════════════════════════════════════════════════════════════ */
+
+.md-content abbr {
+  text-decoration: none;
+  border-bottom: 1px dotted var(--fg-muted);
+  cursor: help;
+}

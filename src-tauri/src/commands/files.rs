@@ -89,8 +89,14 @@ fn get_themes_dir(app: &tauri::AppHandle) -> Result<std::path::PathBuf, String> 
     if let Ok(exe) = std::env::current_exe() {
         if let Some(install_dir) = exe.parent() {
             let themes = install_dir.join("themes");
-            // 如果安装目录不可写，回退到 app_data_dir
-            if themes.exists() || install_dir.join("md++.exe").exists() {
+            // 判断是否在安装目录下运行：检查同目录是否存在平台可执行文件
+            // macOS: md++（位于 .app bundle 内部）; Windows: md++.exe
+            let is_installed = if cfg!(target_os = "macos") {
+                install_dir.join("md++").exists()
+            } else {
+                install_dir.join("md++.exe").exists()
+            };
+            if themes.exists() || is_installed {
                 if !themes.exists() {
                     std::fs::create_dir_all(&themes)
                         .map_err(|e| format!("创建主题目录失败: {}", e))?;
