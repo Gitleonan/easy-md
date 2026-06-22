@@ -3,22 +3,30 @@ import { listen } from '@tauri-apps/api/event';
 import { TitleBar } from './components/TitleBar/TitleBar';
 import { Sidebar } from './components/Sidebar/Sidebar';
 import { Content } from './components/Content/Content';
+import { Editor } from './components/Editor/Editor';
 import { Welcome } from './components/Welcome/Welcome';
 import { SearchBar } from './components/SearchBar/SearchBar';
 import { Lightbox } from './components/Lightbox/Lightbox';
 import { ExportPdfModal } from './components/ExportPdfModal/ExportPdfModal';
+import { AboutModal } from './components/AboutModal/AboutModal';
+import { ThemeManager } from './components/ThemeManager/ThemeManager';
 import { useTabsStore } from './stores/tabsStore';
+import { useEditStore } from './stores/editStore';
+import { useZenStore } from './stores/zenStore';
+import { useCustomThemeStore } from './stores/customThemeStore';
 import { useOpenFile } from './hooks/useOpenFile';
 import { useThemeInit } from './features/theme/useThemeInit';
 import { useGlobalShortcuts } from './hooks/useGlobalShortcuts';
 import { useFileWatcher } from './features/fileWatch/useFileWatcher';
 import { useRecentStore } from './stores/recentStore';
 import { useThemeStore } from './stores/themeStore';
-import { exportPdf } from './features/export/export';
+import { exportDocument, type ExportFormat } from './features/export/export';
 
 export default function App() {
   const [activeHeadingId, setActiveHeadingId] = useState<string | null>(null);
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [themeManagerOpen, setThemeManagerOpen] = useState(false);
 
   useOpenFile();
   useThemeInit();
@@ -27,31 +35,40 @@ export default function App() {
   const contentRef = useRef<HTMLDivElement>(null);
   const hasTabs = useTabsStore((s) => s.tabs.length > 0);
   const activeTab = useTabsStore((s) => s.tabs.find((t) => t.id === s.activeTabId));
+  const isEditing = useEditStore((s) => s.isEditing);
+  const isZen = useZenStore((s) => s.isZen);
+  const disableZen = useZenStore((s) => s.disable);
   const record = useRecentStore((s) => s.record);
   const resolvedTheme = useThemeStore((s) => s.resolved);
 
   const loadRecent = useRecentStore((s) => s.load);
   const restoreSession = useTabsStore((s) => s.restoreSession);
+  const loadThemes = useCustomThemeStore((s) => s.loadThemes);
 
-  // 把“点击导出”和“真正调起打印”分开：先弹应用层 modal，再由用户确认后调起系统打印对话框，
-  // 避免两层弹窗在视觉上糊在一起。
-  const requestExportPdf = useCallback(() => {
+  const requestExport = useCallback(() => {
     if (!contentRef.current) return;
     setExportModalOpen(true);
   }, []);
 
-  const performExportPdf = useCallback(async () => {
-    if (!contentRef.current) return;
-    await exportPdf(contentRef.current, resolvedTheme);
-  }, [resolvedTheme]);
+  const performExport = useCallback(async (format: ExportFormat) => {
+    if (!contentRef.current || !activeTab) return;
+    await exportDocument({
+      element: contentRef.current,
+      source: activeTab.source,
+      fileName: activeTab.fileName,
+      theme: resolvedTheme,
+      format,
+    });
+  }, [activeTab, resolvedTheme]);
 
-  useGlobalShortcuts({ onExportPdf: requestExportPdf });
+  useGlobalShortcuts({ onExportPdf: requestExport });
 
-  // 恢复刷新前打开的标签，避免 WebView 右键刷新后回到空状态。
+  // 恢复刷新前打开的标签 + 自定义主题
   useEffect(() => {
     loadRecent();
     restoreSession();
-  }, [loadRecent, restoreSession]);
+    loadThemes();
+  }, [loadRecent, restoreSession, loadThemes]);
 
   // 命令行参数打开文件
   useEffect(() => {
@@ -66,14 +83,37 @@ export default function App() {
     if (activeTab) record(activeTab.filePath, activeTab.fileName);
   }, [activeTab?.id, record]);
 
+  // 切换 tab 时退出编辑模式
+  useEffect(() => {
+    useEditStore.getState().reset();
+  }, [activeTab?.id]);
+
+  // Zen 模式下 ESC 退出
+  useEffect(() => {
+    if (!isZen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') disableZen();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isZen, disableZen]);
+
   return (
-    <div className="app">
-      <TitleBar onExportPdf={requestExportPdf} />
-      {hasTabs && activeTab && <SearchBar contentRef={contentRef} />}
+    <div className={`app ${isZen ? 'app-zen' : ''}`}>
+      {!isZen && <TitleBar
+        onExport={requestExport}
+        onAbout={() => setAboutOpen(true)}
+        onThemeManager={() => setThemeManagerOpen(true)}
+      />}
+      {hasTabs && activeTab && !isEditing && !isZen && <SearchBar contentRef={contentRef} />}
       <div className="app-body">
-        {hasTabs && activeTab && <Sidebar toc={activeTab.toc} activeId={activeHeadingId} />}
+        {hasTabs && activeTab && !isZen && <Sidebar toc={activeTab.toc} activeId={activeHeadingId} />}
         {hasTabs ? (
-          <Content contentRef={contentRef} onActiveHeadingChange={setActiveHeadingId} />
+          isEditing ? (
+            <Editor />
+          ) : (
+            <Content contentRef={contentRef} onActiveHeadingChange={setActiveHeadingId} />
+          )
         ) : (
           <Welcome />
         )}
@@ -82,8 +122,16 @@ export default function App() {
       <ExportPdfModal
         open={exportModalOpen}
         fileName={activeTab?.fileName ?? null}
-        onConfirm={performExportPdf}
+        onConfirm={performExport}
         onClose={() => setExportModalOpen(false)}
+      />
+      <AboutModal
+        open={aboutOpen}
+        onClose={() => setAboutOpen(false)}
+      />
+      <ThemeManager
+        open={themeManagerOpen}
+        onClose={() => setThemeManagerOpen(false)}
       />
     </div>
   );

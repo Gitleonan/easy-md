@@ -1,0 +1,123 @@
+import { useState, useCallback } from 'react';
+import { openExternalUrl, registerFileAssociation } from '../../ipc/opener';
+import { writeFile, getAppDataDir } from '../../ipc/files';
+import { useTabsStore } from '../../stores/tabsStore';
+import appIcon from '../../assets/app-icon.svg';
+import featuresMd from '../../../features.md?raw';
+
+const APP_VERSION = '0.1.0';
+const GITHUB_URL = 'https://github.com/Gitleonan/easy-md';
+
+interface AboutModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export function AboutModal({ open, onClose }: AboutModalProps) {
+  const [debug, setDebug] = useState(() => localStorage.getItem('mdpp.debug') === 'true');
+  const [openingFeatures, setOpeningFeatures] = useState(false);
+  const [settingDefault, setSettingDefault] = useState(false);
+
+  const openFeatures = useCallback(async () => {
+    if (openingFeatures) return;
+    setOpeningFeatures(true);
+    try {
+      const dir = await getAppDataDir();
+      const featuresPath = `${dir}/features.md`;
+      await writeFile(featuresPath, featuresMd);
+      await useTabsStore.getState().openTab(featuresPath);
+    } catch (err) {
+      console.error('[AboutModal] openFeatures failed:', err);
+    } finally {
+      setOpeningFeatures(false);
+    }
+  }, [openingFeatures]);
+
+  const handleSetDefault = useCallback(async () => {
+    if (settingDefault) return;
+    setSettingDefault(true);
+    try {
+      await registerFileAssociation();
+    } catch (err) {
+      console.error('[AboutModal] registerFileAssociation failed:', err);
+    } finally {
+      setSettingDefault(false);
+    }
+  }, [settingDefault]);
+
+  if (!open) return null;
+
+  const toggleDebug = () => {
+    const next = !debug;
+    setDebug(next);
+    // 调用 main.tsx 暴露的全局函数
+    (window as unknown as Record<string, (on: boolean) => void>).__toggleDebug?.(next);
+  };
+
+  return (
+    <div className="about-overlay" onClick={onClose}>
+      <div className="about-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="about-modal-inner">
+          <img className="about-icon" src={appIcon} alt="" aria-hidden="true" />
+          <h3 className="about-title">md++</h3>
+          <p className="about-version">v{APP_VERSION}</p>
+          <p className="about-desc">轻量便捷的 Markdown 阅读器</p>
+
+          <div className="about-info">
+            <div className="about-row">
+              <span className="about-label">作者</span>
+              <span className="about-value">leonan</span>
+            </div>
+            <div className="about-row">
+              <span className="about-label">协议</span>
+              <span className="about-value">MIT License</span>
+            </div>
+            <div className="about-row">
+              <span className="about-label">仓库</span>
+              <button
+                className="about-link"
+                onClick={() => openExternalUrl(GITHUB_URL)}
+              >
+                GitHub ↗
+              </button>
+            </div>
+            <div className="about-row">
+              <span className="about-label">特性</span>
+              <button
+                className="about-link"
+                onClick={openFeatures}
+                disabled={openingFeatures}
+              >
+                {openingFeatures ? '加载中…' : '查看支持特性'}
+              </button>
+            </div>
+            <div className="about-row">
+              <span className="about-label">默认打开</span>
+              <button
+                className="about-link"
+                onClick={handleSetDefault}
+                disabled={settingDefault}
+              >
+                {settingDefault ? '设置中…' : '设为 MD 默认阅读器'}
+              </button>
+            </div>
+            <div className="about-row">
+              <span className="about-label">调试模式</span>
+              <button
+                className={`about-debug-toggle ${debug ? 'active' : ''}`}
+                onClick={toggleDebug}
+                title={debug ? '关闭后禁止右键菜单' : '开启后可右键审查元素'}
+              >
+                {debug ? '已开启' : '已关闭'}
+              </button>
+            </div>
+          </div>
+
+          <button className="about-close" onClick={onClose}>
+            关闭
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

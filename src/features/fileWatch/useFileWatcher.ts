@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { useTabsStore } from '../../stores/tabsStore';
+import { useEditStore } from '../../stores/editStore';
 import { readFile } from '../../ipc/files';
 import { renderMarkdown } from '../markdown/render';
 import { highlightCodeBlocks } from '../markdown/highlight';
@@ -12,6 +13,11 @@ export function useFileWatcher() {
     const unlisten = listen<string[]>('file-changed', async (e) => {
       const changedPaths = e.payload;
       const { tabs, updateSource } = useTabsStore.getState();
+
+      // 编辑模式保存后 2 秒内忽略文件变更事件，避免自我触发刷新
+      const { lastSaveAt } = useEditStore.getState();
+      if (Date.now() - lastSaveAt < 2000) return;
+
       const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
       for (const path of changedPaths) {
         const tab = tabs.find(

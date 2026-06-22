@@ -52,5 +52,16 @@ if ($CheckOnly) {
   exit 0
 }
 
+$port = 14300
+Write-Step "Checking port $port"
+$existing = netstat -ano | Select-String ":$port " | Select-String "LISTENING"
+if ($existing) {
+  $pidStr = ($existing -split '\s+')[-1]
+  Write-Host "Port $port is in use by PID $pidStr — killing zombie process..."
+  taskkill /F /PID $pidStr 2>$null | Out-Null
+  Start-Sleep -Seconds 1
+  Write-Host "Port released."
+}
+
 Write-Step "Starting md++ development app"
 pnpm tauri dev

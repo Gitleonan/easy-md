@@ -41,7 +41,15 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::files::read_text_file,
+            commands::files::write_text_file,
             commands::files::resolve_image,
+            commands::files::list_custom_themes,
+            commands::files::save_custom_theme,
+            commands::files::read_custom_theme,
+            commands::files::delete_custom_theme,
+            commands::files::get_app_data_dir,
+            commands::opener::open_containing_folder,
+            commands::opener::register_file_association,
             commands::recent::list_recent,
             commands::recent::add_recent,
             watcher::watch_files,

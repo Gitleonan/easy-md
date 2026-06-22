@@ -7,11 +7,12 @@
 
 .md-content h1, .md-content h2, .md-content h3,
 .md-content h4, .md-content h5, .md-content h6 {
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  line-height: 1.3;
-  margin-top: 1.8em;
-  margin-bottom: 0.5em;
+  font-weight: 600;
+  color: var(--fg);
+  overflow-wrap: break-word;
+  outline: none;
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
 }
 
 .md-content h1:first-child,
@@ -21,102 +22,165 @@
 }
 
 .md-content h1 {
-  font-size: 2em;
+  font-size: 28px;
+  line-height: 40px;
+  letter-spacing: -0.02em;
   font-weight: 700;
-  letter-spacing: -0.03em;
   margin-bottom: 0.4em;
 }
 
 .md-content h2 {
-  font-size: 1.5em;
-  padding-bottom: 0.3em;
-  border-bottom: 1px solid var(--border);
-  margin-top: 2.2em;
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+  padding-top: 16px;
+  margin: 32px 0 12px;
+  border-top: 1px solid var(--border);
+  transition: border-top var(--t-color), color var(--t-color);
 }
 
-.md-content h3 { font-size: 1.25em; }
-.md-content h4 { font-size: 1.0625em; }
-.md-content h5 { font-size: 0.9375em; }
-.md-content h6 { font-size: 0.875em; color: var(--fg-muted); }
+.md-content h2:first-of-type {
+  padding-top: 8px;
+  margin-top: 20px;
+  border-top: none;
+}
+
+.md-content h3 {
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+  margin: 32px 0 16px;
+}
+
+.md-content h4 {
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  margin: 24px 0 16px;
+}
+
+.md-content h5, .md-content h6 {
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  margin: 24px 0 16px;
+}
+
+.md-content h6 { color: var(--fg-muted); }
 
 /* ── Body ────────────────────────────────────────────────────── */
 
 .md-content p {
-  margin: 0 0 1em;
+  margin: 16px 0;
+  line-height: 28px;
 }
 
 .md-content a {
+  font-weight: 500;
   color: var(--accent);
-  text-decoration: none;
-  font-weight: 450;
-  transition: color var(--duration-fast) var(--ease-out);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--t-color), opacity var(--t-color), text-underline-offset var(--t-color);
 }
 
 .md-content a:hover {
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  text-decoration-thickness: 1px;
+  color: var(--accent-hover);
+  text-underline-offset: 5px;
 }
 
-/* 外链：缀一个 ↗ 图标，颜色稍冷一点，便于和站内链接区分 */
-.md-content a.md-link-external {
-  color: var(--link-external, #2563eb);
-  border-bottom: 1px dashed color-mix(in srgb, var(--accent) 35%, transparent);
-}
-
+/* 外链：SVG 箭头图标 */
 .md-content a.md-link-external::after {
-  content: "↗";
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' aria-hidden='true' focusable='false' viewBox='0 0 24 24'%3E%3Cpath d='M0 0h24v24H0V0z' fill='none'/%3E%3Cpath d='M9 5v2h6.59L4 18.59 5.41 20 17 8.41V15h2V5H9z' fill='currentColor'/%3E%3C/svg%3E");
   display: inline-block;
-  margin-left: 0.18em;
-  font-size: 0.85em;
-  opacity: 0.75;
-  transform: translateY(-0.05em);
+  flex-shrink: 0;
+  width: 11px;
+  height: 11px;
+  margin-top: -1px;
+  margin-left: 4px;
+  color: var(--fg-muted);
+  background: currentcolor;
+  -webkit-mask-image: var(--icon);
+  mask-image: var(--icon);
+  content: "";
 }
 
 .md-content a.md-link-external:hover {
-  border-bottom-color: var(--accent);
+  text-decoration: underline;
+}
+
+.md-content a.md-link-external:has(> img)::after {
+  display: none;
+}
+
+.md-content p:has(> a > img[src*="img.shields.io"]) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 24px;
+}
+
+.md-content p:has(> a > img[src*="img.shields.io"]) a {
+  display: inline-flex;
+  line-height: 1;
   text-decoration: none;
 }
 
-:root[data-theme="dark"] .md-content a.md-link-external {
-  color: var(--link-external, #60a5fa);
+.md-content p:has(> a > img[src*="img.shields.io"]) img {
+  display: block;
+  border-radius: 4px;
+  box-shadow: none;
+  cursor: pointer;
 }
 
-/* md → md：加一个小书页图标，提示是站内跳转 */
-.md-content a.md-link-md::before {
-  content: "📄";
-  display: inline-block;
-  margin-right: 0.25em;
-  font-size: 0.85em;
-  opacity: 0.75;
+.md-content p:has(> a > img[src*="img.shields.io"]) img:hover {
+  box-shadow: none;
 }
 
+/* md → md 链接保持默认样式即可 */
 .md-content a.md-link-md {
-  border-bottom: 1px dotted color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--accent);
 }
 
-.md-content strong { font-weight: 650; }
+.md-content strong { font-weight: 600; }
 .md-content em { font-style: italic; }
 
 /* ── Code ────────────────────────────────────────────────────── */
 
-.md-content code:not(pre code) {
-  background: var(--code-bg);
-  padding: 0.15em 0.4em;
+.md-content :not(pre, h1, h2, h3, h4, h5, h6) > code {
+  font-size: 0.875em;
+  color: var(--code-inline-fg);
+  transition: color var(--t-color);
+}
+
+.md-content :not(pre) > code {
+  padding: 3px 6px;
+  background-color: var(--code-inline-bg);
   border-radius: 4px;
-  font-size: 0.88em;
-  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", "SFMono-Regular", Consolas, monospace;
-  font-weight: 450;
+  border: none;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  transition: color var(--t-color), background-color var(--t-color);
+  word-break: break-word;
+}
+
+.md-content h1 > code,
+.md-content h2 > code,
+.md-content h3 > code,
+.md-content h4 > code {
+  font-size: 0.9em;
 }
 
 .md-content pre {
   background: var(--code-bg);
-  padding: 16px 18px;
+  padding: 20px 24px;
   border-radius: var(--radius-md);
   overflow: auto;
-  margin: 0 0 16px;
-  font-size: 0.85em;
-  line-height: 1.65;
+  margin: 0;
+  font-size: 0.875em;
+  line-height: 1.45;
+  font-family: inherit;
+  transition: background-color var(--t-color);
 }
 
 .md-content pre code {
@@ -125,49 +189,118 @@
   border-radius: 0;
   font-size: 1em;
   font-weight: 400;
+  color: var(--fg-muted);
+  -webkit-hyphens: none;
+  hyphens: none;
+  text-align: left;
+  word-break: normal;
+  overflow-wrap: normal;
+  tab-size: 4;
+  white-space: pre;
+  word-spacing: normal;
+  direction: ltr;
 }
 
-/* ── Blockquote ──────────────────────────────────────────────── */
+/* ── Blockquote (plume card style) ───────────────────────────── */
 
 .md-content blockquote {
-  border-left: 3px solid var(--accent);
-  padding: 0.5em 16px;
+  position: relative;
+  padding: 8px 20px 8px 36px;
+  margin: 16px 0;
   color: var(--fg-muted);
-  margin: 0 0 1em;
-  background: var(--accent-soft);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  border: none;
+  transition: background-color var(--t-color), color var(--t-color);
+}
+
+.md-content blockquote::before {
+  position: absolute;
+  top: 0;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  content: "";
+  background-color: var(--fg);
+  opacity: 0.3;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M3.691 6.292C5.094 4.771 7.217 4 10 4h1v2.819l-.804.161c-1.37.274-2.323.813-2.833 1.604A2.9 2.9 0 0 0 6.925 10H10a1 1 0 0 1 1 1v7c0 1.103-.897 2-2 2H3a1 1 0 0 1-1-1v-5l.003-2.919c-.009-.111-.199-2.741 1.688-4.789M20 20h-6a1 1 0 0 1-1-1v-5l.003-2.919c-.009-.111-.199-2.741 1.688-4.789C16.094 4.771 18.217 4 21 4h1v2.819l-.804.161c-1.37.274-2.323.813-2.833 1.604A2.9 2.9 0 0 0 17.925 10H21a1 1 0 0 1 1 1v7c0 1.103-.897 2-2 2'/%3E%3C/svg%3E") no-repeat center / contain;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M3.691 6.292C5.094 4.771 7.217 4 10 4h1v2.819l-.804.161c-1.37.274-2.323.813-2.833 1.604A2.9 2.9 0 0 0 6.925 10H10a1 1 0 0 1 1 1v7c0 1.103-.897 2-2 2H3a1 1 0 0 1-1-1v-5l.003-2.919c-.009-.111-.199-2.741 1.688-4.789M20 20h-6a1 1 0 0 1-1-1v-5l.003-2.919c-.009-.111-.199-2.741 1.688-4.789C16.094 4.771 18.217 4 21 4h1v2.819l-.804.161c-1.37.274-2.323.813-2.833 1.604A2.9 2.9 0 0 0 17.925 10H21a1 1 0 0 1 1 1v7c0 1.103-.897 2-2 2'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+.md-content blockquote > p {
+  margin: 0;
+  font-size: 16px;
+  color: inherit;
 }
 
 .md-content blockquote p:last-child { margin-bottom: 0; }
 
-/* ── Table ───────────────────────────────────────────────────── */
+/* ── Table (plume: alternating stripes + full border grid) ───── */
 
 .md-content table {
+  display: block;
+  margin: 20px 0;
+  overflow-x: auto;
   border-collapse: collapse;
-  margin: 0 0 1em;
-  width: 100%;
-  font-size: 0.9375em;
+  font-size: 14px;
+}
+
+.md-content tr {
+  background-color: var(--bg);
+  border-top: 1px solid var(--border);
+  transition: var(--t-color);
+  transition-property: background-color, border-top;
+}
+
+.md-content tr:nth-child(2n) {
+  background-color: var(--bg-secondary);
 }
 
 .md-content th, .md-content td {
-  padding: 8px 14px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
   text-align: left;
-  border-bottom: 1px solid var(--border);
+  transition: border var(--t-color);
 }
 
 .md-content th {
-  background: var(--bg-secondary);
+  font-size: 14px;
   font-weight: 600;
-  font-size: 0.875em;
+  color: var(--fg-muted);
+  background-color: var(--bg-secondary);
+  transition: var(--t-color);
+  transition-property: color, background-color, border;
 }
 
-.md-content tr:last-child td { border-bottom: none; }
+.md-content td {
+  font-size: 14px;
+}
 
 /* ── Lists ───────────────────────────────────────────────────── */
 
 .md-content ul, .md-content ol {
   padding-left: 1.5em;
   margin: 0 0 1em;
+}
+
+.md-content ul {
+  list-style-type: disc;
+}
+
+.md-content ul ul {
+  list-style-type: circle;
+}
+
+.md-content ul ul ul {
+  list-style-type: square;
+}
+
+.md-content ol {
+  list-style-type: decimal;
+}
+
+.md-content ol ol {
+  list-style-type: lower-alpha;
 }
 
 .md-content li + li {
@@ -187,10 +320,10 @@
 /* ── Horizontal Rule ─────────────────────────────────────────── */
 
 .md-content hr {
+  margin: 16px 0;
   border: none;
-  height: 1px;
-  background: var(--border);
-  margin: 2.5em 0;
+  border-top: 1px solid var(--border);
+  transition: border-top var(--t-color);
 }
 
 /* ── Images ──────────────────────────────────────────────────── */
@@ -206,29 +339,129 @@
   box-shadow: var(--shadow-md);
 }
 
-/* ── Mark ────────────────────────────────────────────────────── */
+/* ── Mark (plume animated sweep underline) ───────────────────── */
 
 .md-content mark {
-  background: var(--mark-bg);
-  padding: 0.05em 0.2em;
-  border-radius: 3px;
+  --vp-mark-text: currentcolor;
+  --vp-mark-bg: transparent;
+  --vp-mark-bg-shift: 0.55lh;
+  --vp-mark-linear-color: var(--mark-linear-color, #8cccd5);
+  --vp-mark-bg-image: linear-gradient(to right, var(--vp-mark-linear-color) 50%, transparent 50%);
+
+  padding: 2px;
+  color: var(--vp-mark-text);
+  background-color: var(--vp-mark-bg);
+  background-image: var(--vp-mark-bg-image);
+  background-repeat: no-repeat;
+  background-position: 100% var(--vp-mark-bg-shift);
+  background-size: 200%;
+  animation: mark-highlight 1.5s 0.5s forwards;
 }
 
-/* ── Checkbox ────────────────────────────────────────────────── */
-
-.md-content input[type="checkbox"] {
-  margin-right: 0.5em;
-  accent-color: var(--accent);
+:not(h1,h2,h3,h4,h5,h6) .md-content mark {
+  font-weight: 500;
 }
 
-/* ── Footnotes ───────────────────────────────────────────────── */
+@keyframes mark-highlight {
+  0% {
+    color: inherit;
+    background-position: 100% var(--vp-mark-bg-shift);
+  }
+  100% {
+    color: currentcolor;
+    background-position: 0 var(--vp-mark-bg-shift);
+  }
+}
+
+/* ── Checkbox (plume custom SVG) ─────────────────────────────── */
+
+.md-content .task-list-container {
+  padding-left: 0;
+  list-style: none;
+}
+
+.md-content .task-list-container .task-list-item {
+  position: relative;
+}
+
+.md-content .task-list-container .task-list-item input {
+  position: absolute;
+  top: 0.1em;
+  left: -0.15em;
+  z-index: 1;
+  opacity: 0;
+}
+
+.md-content .task-list-container .task-list-item label {
+  margin-left: 1.2em;
+}
+
+.md-content .task-list-container .task-list-item label::before {
+  position: absolute;
+  top: -0.1em;
+  left: -0.15em;
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  content: "";
+  --icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="1em" height="1em" viewBox="0 0 32 32"%3E%3Cpath fill="%23c2c2c4" d="M26 27.5H6A1.5 1.5 0 0 1 4.5 26V6c0-.83.67-1.5 1.5-1.5h20c.828 0 1.5.67 1.5 1.5v20a1.5 1.5 0 0 1-1.5 1.5m-18.5-3h17v-17h-17z"%2F%3E%3C%2Fsvg%3E');
+  background-image: var(--icon);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  transform: translateY(4px);
+}
+
+.md-content .task-list-container .task-list-item input:checked[disabled] + label::before {
+  --icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="1em" height="1em" viewBox="0 0 32 32"%3E%3Cpath fill="%23299764" d="M29.548 3.043a2.5 2.5 0 0 0-3.513.4L16 16.067l-3.508-4.414a2.5 2.5 0 0 0-3.915 3.112l5.465 6.875c.474.597 1.195.943 1.957.943s1.482-.35 1.957-.944L29.95 6.555c.86-1.08.68-2.654-.402-3.513zM24.5 24.5h-17v-17h12.756l2.385-3H6c-.83 0-1.5.67-1.5 1.5v20c0 .828.67 1.5 1.5 1.5h20a1.5 1.5 0 0 0 1.5-1.5V12.85l-3 3.774z"%2F%3E%3C%2Fsvg%3E');
+}
+
+/* ── Footnotes (plume card style) ────────────────────────────── */
+
+.md-content .footnotes-sep {
+  margin-top: 32px;
+}
 
 .md-content .footnotes {
-  font-size: 0.875em;
+  position: relative;
+  padding: 12px 0 12px 16px;
+  margin-top: 16px;
+  font-size: 14px;
   color: var(--fg-muted);
-  border-top: 1px solid var(--border);
-  padding-top: 1em;
-  margin-top: 2.5em;
+  background-color: var(--code-bg);
+  border-radius: 6px;
+  opacity: 0.7;
+  transition: background var(--t-color);
+}
+
+.md-content .footnotes p {
+  line-height: 24px;
+}
+
+.md-content .footnotes ol {
+  margin: 0;
+}
+
+.md-content .footnotes ol p {
+  margin: 8px 0;
+}
+
+.md-content .footnote-backref {
+  position: relative;
+  color: transparent;
+  text-decoration: none;
+}
+
+.md-content .footnote-backref:hover {
+  color: transparent;
+}
+
+.md-content .footnote-backref::before {
+  position: absolute;
+  top: -0.4em;
+  left: 0;
+  font-size: 1em;
+  content: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="1em" height="1em" viewBox="0 0 48 48"%3E%3Cg fill="none" stroke="%23c2c2c4" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"%3E%3Cpath d="m13 8l-7 6l7 7"%2F%3E%3Cpath d="M6 14h22.994c6.883 0 12.728 5.62 12.996 12.5c.284 7.27-5.723 13.5-12.996 13.5H11.998"%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
 }
 
 /* ── Mermaid ─────────────────────────────────────────────────── */
@@ -236,11 +469,696 @@
 .md-content .mermaid {
   text-align: center;
   margin: 1.5em 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.md-content .mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.md-content .mermaid-error {
+  display: block;
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 12px 14px;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--mermaid-error, #c62828);
+  text-align: left;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
 }
 
 /* ── KaTeX ───────────────────────────────────────────────────── */
 
 .md-content .katex-display {
   margin: 1.5em 0;
+  max-width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+}
+
+.md-content .katex {
+  max-width: 100%;
+  color: var(--fg);
+}
+
+/* 修复根号（sqrt）SVG 渲染：确保描边颜色可见 */
+.md-content .katex svg {
+  color: var(--fg);
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.md-content .katex .sqrt-line,
+.md-content .katex .overline-line,
+.md-content .katex .underline-line,
+.md-content .katex .frac-line {
+  border-color: currentColor;
+  min-height: 1px;
+}
+
+.md-content .katex .mord.textstyle,
+.md-content .katex .mop.textstyle {
+  color: var(--fg);
+}
+
+/* ── GitHub Alerts (plume hint-container style) ──────────────── */
+
+.md-content .github-alert {
+  padding: 10px 14px;
+  margin: 16px 0;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--fg-muted);
+  background-color: var(--alert-bg, var(--bg-secondary));
+  border: 1px solid;
+  border-color: var(--alert-border, transparent);
+  border-radius: 8px;
+}
+
+.md-content .github-alert > p {
+  margin: 0;
+}
+
+.md-content .github-alert > p + p {
+  margin-top: 6px;
+}
+
+.md-content .github-alert-title {
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--alert-title, var(--fg));
+}
+
+.md-content .github-alert-title::before {
+  display: inline-block;
+  width: 1.25em;
+  height: 1.25em;
+  margin-right: 4px;
+  vertical-align: middle;
+  content: "";
+  background-image: var(--alert-icon);
+  background-repeat: no-repeat;
+  background-size: 100%;
+  transform: translateY(-1px);
+}
+
+.md-content .github-alert a {
+  color: var(--alert-link, var(--accent));
+}
+
+/* NOTE */
+.md-content .github-alert-note {
+  --alert-bg: rgb(142 150 170 / 0.14);
+  --alert-border: transparent;
+  --alert-title: var(--fg);
+  --alert-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%235da1a2' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M10 4H7.2c-1.12 0-1.68 0-2.108.218a2 2 0 0 0-.874.874C4 5.52 4 6.08 4 7.2v9.6c0 1.12 0 1.68.218 2.108a2 2 0 0 0 .874.874c.427.218.987.218 2.105.218h9.606c1.118 0 1.677 0 2.104-.218c.377-.192.683-.498.875-.874c.218-.428.218-.987.218-2.105V14m-4-9l-6 6v3h3l6-6m-3-3l3-3l3 3l-3 3m-3-3l3 3'/%3E%3C/svg%3E");
+}
+
+/* TIP */
+.md-content .github-alert-tip {
+  --alert-bg: rgb(16 185 129 / 0.14);
+  --alert-border: transparent;
+  --alert-title: var(--fg);
+  --alert-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 512 512'%3E%3Cpath fill='%2330a46c' d='M208 464h96v32h-96zm-16-48h128v32H192zM369.42 62.69C339.35 32.58 299.07 16 256 16A159.62 159.62 0 0 0 96 176c0 46.62 17.87 90.23 49 119.64l4.36 4.09C167.37 316.57 192 339.64 192 360v40h48V269.11L195.72 244L214 217.72L256 240l41.29-22.39l19.1 25.68l-44.39 26V400h48v-40c0-19.88 24.36-42.93 42.15-59.77l4.91-4.66C399.08 265 416 223.61 416 176a159.16 159.16 0 0 0-46.58-113.31'/%3E%3C/svg%3E");
+}
+
+/* IMPORTANT */
+.md-content .github-alert-important {
+  --alert-bg: rgb(159 122 234 / 0.14);
+  --alert-border: transparent;
+  --alert-title: var(--fg);
+  --alert-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 24 24'%3E%3Cpath fill='%238e5cd9' d='M5 19q-.425 0-.712-.288T4 18t.288-.712T5 17h1v-7q0-2.075 1.25-3.687T10.5 4.2v-.7q0-.625.438-1.062T12 2t1.063.438T13.5 3.5v.7q2 .5 3.25 2.113T18 10v7h1q.425 0 .713.288T20 18t-.288.713T19 19zm7 3q-.825 0-1.412-.587T10 20h4q0 .825-.587 1.413T12 22m0-9q.425 0 .713-.288T13 12V9q0-.425-.288-.712T12 8t-.712.288T11 9v3q0 .425.288.713T12 13m0 3q.425 0 .713-.288T13 15t-.288-.712T12 14t-.712.288T11 15t.288.713T12 16'/%3E%3C/svg%3E");
+}
+
+/* WARNING */
+.md-content .github-alert-warning {
+  --alert-bg: rgb(234 179 8 / 0.14);
+  --alert-border: transparent;
+  --alert-title: var(--fg);
+  --alert-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 16 16'%3E%3Cpath fill='%23da8b17' fill-rule='evenodd' d='M6.285 1.975C7.06.68 8.939.68 9.715 1.975l5.993 9.997c.799 1.333-.161 3.028-1.716 3.028H2.008C.453 15-.507 13.305.292 11.972zM8 5a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 5m1 6.5a1 1 0 1 1-2 0a1 1 0 0 1 2 0' clip-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+/* CAUTION */
+.md-content .github-alert-caution {
+  --alert-bg: rgb(244 63 94 / 0.14);
+  --alert-border: transparent;
+  --alert-title: var(--fg);
+  --alert-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 24 24'%3E%3Cpath fill='%23b62a3c' d='M8.27 3L3 8.27v7.46L8.27 21h7.46L21 15.73V8.27L15.73 3M8.41 7L12 10.59L15.59 7L17 8.41L13.41 12L17 15.59L15.59 17L12 13.41L8.41 17L7 15.59L10.59 12L7 8.41'/%3E%3C/svg%3E");
+}
+
+:root[data-theme="dark"] .md-content .github-alert-note {
+  --alert-bg: rgb(101 117 133 / 0.16);
+}
+:root[data-theme="dark"] .md-content .github-alert-tip {
+  --alert-bg: rgb(16 185 129 / 0.16);
+}
+:root[data-theme="dark"] .md-content .github-alert-important {
+  --alert-bg: rgb(159 122 234 / 0.16);
+}
+:root[data-theme="dark"] .md-content .github-alert-warning {
+  --alert-bg: rgb(234 179 8 / 0.16);
+}
+:root[data-theme="dark"] .md-content .github-alert-caution {
+  --alert-bg: rgb(244 63 94 / 0.16);
+}
+
+/* ── Tip Containers (plume hint-container style) ─────────────── */
+
+.md-content .md-container {
+  padding: 16px 16px 8px;
+  margin: 16px 0;
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--fg-muted);
+  background-color: var(--container-bg, var(--bg-secondary));
+  border: 1px solid;
+  border-color: var(--container-border, transparent);
+  border-radius: 8px;
+}
+
+.md-content .md-container p:last-child { margin-bottom: 0; }
+
+.md-content .md-container-title {
+  font-weight: 600;
+  margin: 0 0 0.5em;
+  color: var(--container-title, var(--fg));
+}
+
+.md-content .md-container-title::before {
+  display: inline-block;
+  width: 1.25em;
+  height: 1.25em;
+  margin-right: 4px;
+  vertical-align: middle;
+  content: "";
+  background-image: var(--container-icon);
+  background-repeat: no-repeat;
+  background-size: 100%;
+  transform: translateY(-1px);
+}
+
+.md-content .md-container a {
+  color: var(--container-link, var(--accent));
+}
+
+.md-content .md-container code {
+  font-size: 13px;
+  color: var(--container-code, var(--code-inline-fg));
+  background-color: var(--container-code-bg, var(--code-inline-bg));
+}
+
+/* NOTE */
+.md-content .md-container-note {
+  --container-bg: rgb(142 150 170 / 0.14);
+  --container-border: transparent;
+  --container-title: var(--fg);
+  --container-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%235da1a2' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M10 4H7.2c-1.12 0-1.68 0-2.108.218a2 2 0 0 0-.874.874C4 5.52 4 6.08 4 7.2v9.6c0 1.12 0 1.68.218 2.108a2 2 0 0 0 .874.874c.427.218.987.218 2.105.218h9.606c1.118 0 1.677 0 2.104-.218c.377-.192.683-.498.875-.874c.218-.428.218-.987.218-2.105V14m-4-9l-6 6v3h3l6-6m-3-3l3-3l3 3l-3 3m-3-3l3 3'/%3E%3C/svg%3E");
+}
+
+/* INFO */
+.md-content .md-container-info {
+  --container-bg: rgb(142 150 170 / 0.14);
+  --container-border: transparent;
+  --container-title: var(--fg);
+  --container-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='21' fill='%232196f3'/%3E%3Cpath fill='%23fff' d='M22 22h4v11h-4z'/%3E%3Ccircle cx='24' cy='16.5' r='2.5' fill='%23fff'/%3E%3C/svg%3E");
+}
+
+/* TIP */
+.md-content .md-container-tip {
+  --container-bg: rgb(16 185 129 / 0.14);
+  --container-border: transparent;
+  --container-title: var(--fg);
+  --container-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 512 512'%3E%3Cpath fill='%2330a46c' d='M208 464h96v32h-96zm-16-48h128v32H192zM369.42 62.69C339.35 32.58 299.07 16 256 16A159.62 159.62 0 0 0 96 176c0 46.62 17.87 90.23 49 119.64l4.36 4.09C167.37 316.57 192 339.64 192 360v40h48V269.11L195.72 244L214 217.72L256 240l41.29-22.39l19.1 25.68l-44.39 26V400h48v-40c0-19.88 24.36-42.93 42.15-59.77l4.91-4.66C399.08 265 416 223.61 416 176a159.16 159.16 0 0 0-46.58-113.31'/%3E%3C/svg%3E");
+}
+
+/* WARNING */
+.md-content .md-container-warning {
+  --container-bg: rgb(234 179 8 / 0.14);
+  --container-border: transparent;
+  --container-title: var(--fg);
+  --container-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 16 16'%3E%3Cpath fill='%23da8b17' fill-rule='evenodd' d='M6.285 1.975C7.06.68 8.939.68 9.715 1.975l5.993 9.997c.799 1.333-.161 3.028-1.716 3.028H2.008C.453 15-.507 13.305.292 11.972zM8 5a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 5m1 6.5a1 1 0 1 1-2 0a1 1 0 0 1 2 0' clip-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+/* CAUTION */
+.md-content .md-container-caution {
+  --container-bg: rgb(244 63 94 / 0.14);
+  --container-border: transparent;
+  --container-title: var(--fg);
+  --container-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 24 24'%3E%3Cpath fill='%23b62a3c' d='M8.27 3L3 8.27v7.46L8.27 21h7.46L21 15.73V8.27L15.73 3M8.41 7L12 10.59L15.59 7L17 8.41L13.41 12L17 15.59L15.59 17L12 13.41L8.41 17L7 15.59L10.59 12L7 8.41'/%3E%3C/svg%3E");
+}
+
+:root[data-theme="dark"] .md-content .md-container-note {
+  --container-bg: rgb(101 117 133 / 0.16);
+}
+:root[data-theme="dark"] .md-content .md-container-info {
+  --container-bg: rgb(101 117 133 / 0.16);
+}
+:root[data-theme="dark"] .md-content .md-container-tip {
+  --container-bg: rgb(16 185 129 / 0.16);
+}
+:root[data-theme="dark"] .md-content .md-container-warning {
+  --container-bg: rgb(234 179 8 / 0.16);
+}
+:root[data-theme="dark"] .md-content .md-container-caution {
+  --container-bg: rgb(244 63 94 / 0.16);
+}
+
+/* ── Details (折叠) ─────────────────────────────────────────── */
+
+.md-content .md-details {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin: 0 0 1em;
+  overflow: hidden;
+}
+
+.md-content .md-details-summary {
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 0.9375em;
+  cursor: pointer;
+  background: var(--bg-secondary);
+  color: var(--fg);
+  transition: background var(--duration-fast) var(--ease-out);
+  user-select: none;
+}
+
+.md-content .md-details-summary:hover {
+  background: color-mix(in srgb, var(--fg) 6%, var(--bg-secondary));
+}
+
+.md-content .md-details[open] .md-details-summary {
+  border-bottom: 1px solid var(--border);
+}
+
+.md-content .md-details > :not(summary) {
+  padding: 0 16px;
+}
+
+.md-content .md-details > :not(summary):first-of-type {
+  padding-top: 12px;
+}
+
+.md-content .md-details > :last-child {
+  padding-bottom: 12px;
+}
+
+/* ── Tabs 容器 ──────────────────────────────────────────────── */
+
+.md-content .md-tabs {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin: 0 0 1em;
+  overflow: hidden;
+}
+
+.md-content .md-tab {
+  display: inline-block;
+}
+
+.md-content .md-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 8px 16px;
+  font-size: 0.875em;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.md-content .md-tab-btn:hover {
+  color: var(--fg);
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+}
+
+.md-content .md-tab-btn.md-tab-active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.md-content .md-tab-content {
+  display: none;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.md-content .md-tab-content.md-tab-active {
+  display: block;
+}
+
+/* ── Code Group ─────────────────────────────────────────────── */
+
+.md-content .md-code-group {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin: 0 0 1em;
+  overflow: hidden;
+}
+
+.md-content .md-code-group pre {
+  margin: 0;
+  border-radius: 0;
+}
+
+/* ── Code Block Wrapper ──────────────────────────────────────── */
+
+.md-content .code-block-wrapper {
+  position: relative;
+  margin: 16px 0;
+}
+
+.md-content .code-block-wrapper pre {
+  margin: 0;
+}
+
+.md-content .code-block-wrapper.has-title {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.md-content .code-block-wrapper.has-title pre {
+  border-radius: 0;
+}
+
+/* ── Code Block Title (plume: bottom accent bar) ────────────── */
+
+.md-content .code-block-title {
+  background: var(--code-bg);
+  padding: 11px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fg);
+  position: relative;
+  border-bottom: none;
+  font-family: var(--font-mono);
+}
+
+.md-content .code-block-title::before {
+  position: absolute;
+  right: 8px;
+  bottom: 0;
+  left: 8px;
+  display: inline-block;
+  height: 2px;
+  content: "";
+  background-color: var(--accent);
+  border-radius: 2px;
+}
+
+/* ── Code Line Numbers (plume style) ────────────────────────── */
+
+.md-content .code-block-wrapper.line-numbers-mode {
+  padding-left: 0;
+}
+
+.md-content .code-block-wrapper.line-numbers-mode pre {
+  position: relative;
+  padding-left: 64px;
+}
+
+.md-content .code-block-wrapper.line-numbers-mode .line-numbers {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  box-sizing: border-box;
+  width: 48px;
+  height: auto;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  line-height: 1.45;
+  color: var(--code-line-number);
+  text-align: right;
+  border-right: 1px solid var(--code-line-divider);
+  pointer-events: none;
+  user-select: none;
+  transition: border-right var(--t-color), color var(--t-color);
+}
+
+.md-content .code-block-wrapper.line-numbers-mode .line-number {
+  flex: 0 0 1lh;
+  display: block;
+  height: 1lh;
+  padding-right: 10px;
+  font-variant-numeric: tabular-nums;
+  line-height: inherit;
+}
+
+.md-content .code-block-wrapper.has-title.line-numbers-mode .line-numbers {
+  top: 64px;
+  height: auto;
+}
+
+.md-content .code-block-wrapper.has-title.line-numbers-mode pre {
+  border-radius: 0;
+}
+
+/* ── Code Line Marks (plume colors) ─────────────────────────── */
+
+/* 已迁移到下方 .code-line-* 统一样式组 */
+
+/* ── Code Indent Guides ─────────────────────────────────────── */
+
+.md-content .code-block-wrapper .indent {
+  position: relative;
+  display: inline-block;
+}
+
+.md-content .code-block-wrapper .indent:empty {
+  height: 1lh;
+  vertical-align: bottom;
+}
+
+.md-content .code-block-wrapper .indent::before {
+  position: absolute;
+  width: 1px;
+  height: 100%;
+  content: "";
+  background-color: currentcolor;
+  opacity: 0.15;
+}
+
+/* ── Superscript / Subscript ────────────────────────────────── */
+
+.md-content sup, .md-content sub {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.md-content sup { top: -0.5em; }
+.md-content sub { bottom: -0.25em; }
+
+/* ── Abbreviations ──────────────────────────────────────────── */
+
+.md-content abbr {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: help;
+}
+
+.md-content abbr:hover {
+  text-decoration-style: solid;
+}
+
+/* ── Emoji ──────────────────────────────────────────────────── */
+
+.md-content .emoji {
+  height: 1em;
+  width: 1em;
+  margin: 0 0.05em 0 0.1em;
+  vertical-align: -0.1em;
+}
+
+/* ── Code Line Marks ─────────────────────────────────────────── */
+
+/*
+ * Shiki 输出 <pre class="shiki"><code><span class="line">…</span>…</code></pre>。
+ * 默认 .line 是 inline，背景只盖住文本。我们把水平内边距从 <pre> 移到每一行
+ * 自身，让 .line 能够占满整行宽度 —— 这样行标记的色块、左侧边线、
+ * 加/减号符号都能完整覆盖整行。普通无 shiki 的代码块仍由
+ * <pre> 自带 padding，所以这里只针对 .shiki 命中。
+ */
+.md-content .code-block-wrapper pre.shiki {
+  padding-left: 0;
+  padding-right: 0;
+}
+.md-content .shiki code {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+}
+.md-content .shiki .line {
+  display: inline-block;
+  width: 100%;
+  min-height: 1lh;
+  line-height: inherit;
+  padding: 0 24px 0 21px;   /* 21 = 24 - 3，给左侧 3px 边线让位 */
+  border-left: 3px solid transparent;
+  box-sizing: border-box;
+}
+
+/* 行号模式下，pre 默认带 64px 左 padding，需要让 .line 接管 */
+.md-content .code-block-wrapper.line-numbers-mode pre.shiki {
+  padding-left: 0;
+}
+.md-content .code-block-wrapper.line-numbers-mode .shiki .line {
+  padding-left: 61px;       /* 64 - 3 */
+}
+
+/* 高亮行 — 黄色背景 + 左侧黄色边线 */
+.md-content .shiki .line.code-line-highlight {
+  background: rgba(234, 179, 8, 0.18);
+  border-left-color: rgba(234, 179, 8, 0.9);
+}
+
+/*
+ * 聚焦行 — 出现 .code-line-focus 时，让其它行轻度模糊变淡；hover 整个 code 时恢复。
+ */
+.md-content .shiki code:has(.code-line-focus) .line:not(.code-line-focus) {
+  filter: blur(0.085rem);
+  opacity: 0.55;
+  transition: filter 0.2s, opacity 0.2s;
+}
+.md-content .shiki code:has(.code-line-focus):hover .line:not(.code-line-focus) {
+  filter: none;
+  opacity: 1;
+}
+.md-content .shiki .line.code-line-focus {
+  background: rgba(142, 150, 170, 0.16);
+  border-left-color: rgba(142, 150, 170, 0.75);
+}
+
+/* 新增行 — 绿色背景 + 左侧加号 + 绿边 */
+.md-content .shiki .line.code-line-add {
+  background: rgba(16, 185, 129, 0.18);
+  border-left-color: rgba(16, 185, 129, 0.9);
+  position: relative;
+}
+.md-content .shiki .line.code-line-add::before {
+  content: "+";
+  position: absolute;
+  left: 8px;
+  color: #18794e;
+  font-weight: 700;
+}
+
+/* 删除行 — 红色背景 + 左侧减号 + 红边 */
+.md-content .shiki .line.code-line-remove {
+  background: rgba(244, 63, 94, 0.16);
+  border-left-color: rgba(244, 63, 94, 0.85);
+  position: relative;
+}
+.md-content .shiki .line.code-line-remove::before {
+  content: "−";
+  position: absolute;
+  left: 8px;
+  color: #b8272c;
+  font-weight: 700;
+}
+
+/* 行号开启时 ±号要落在行号槽外侧（48px 槽 + 8px 内边距） */
+.md-content .code-block-wrapper.line-numbers-mode .shiki .line.code-line-add::before,
+.md-content .code-block-wrapper.line-numbers-mode .shiki .line.code-line-remove::before {
+  left: 48px;
+}
+
+/* 错误行 / 警告行 */
+.md-content .shiki .line.code-line-error {
+  background: rgba(244, 63, 94, 0.22);
+  border-left-color: rgba(244, 63, 94, 0.9);
+}
+.md-content .shiki .line.code-line-warning {
+  background: rgba(234, 179, 8, 0.22);
+  border-left-color: rgba(234, 179, 8, 0.9);
+}
+
+/* 暗色主题适配 — 背景再浓一点，确保在 github-dark 上看清 */
+:root[data-theme="dark"] .md-content .shiki .line.code-line-highlight {
+  background: rgba(234, 179, 8, 0.28);
+  border-left-color: rgba(234, 179, 8, 0.9);
+}
+:root[data-theme="dark"] .md-content .shiki .line.code-line-focus {
+  background: rgba(101, 117, 133, 0.26);
+}
+:root[data-theme="dark"] .md-content .shiki .line.code-line-add {
+  background: rgba(16, 185, 129, 0.26);
+}
+:root[data-theme="dark"] .md-content .shiki .line.code-line-add::before {
+  color: #3dd68c;
+}
+:root[data-theme="dark"] .md-content .shiki .line.code-line-remove {
+  background: rgba(244, 63, 94, 0.24);
+}
+:root[data-theme="dark"] .md-content .shiki .line.code-line-remove::before {
+  color: #f66f81;
+}
+:root[data-theme="dark"] .md-content .shiki .line.code-line-error {
+  background: rgba(244, 63, 94, 0.28);
+}
+:root[data-theme="dark"] .md-content .shiki .line.code-line-warning {
+  background: rgba(234, 179, 8, 0.28);
+}
+
+/* ── Details 折叠内边距修正 ──────────────────────────────────── */
+
+.md-content .md-details > :not(summary) {
+  padding: 4px 20px;
+}
+
+.md-content .md-details > :not(summary):first-of-type {
+  padding-top: 14px;
+}
+
+.md-content .md-details > :last-child {
+  padding-bottom: 14px;
+}
+
+/* ── 嵌套引用区分 ────────────────────────────────────────────── */
+
+.md-content blockquote blockquote {
+  background: color-mix(in srgb, var(--fg) 5%, var(--bg-secondary));
+  border-left: 3px solid var(--border);
+  border-radius: 0 8px 8px 0;
+}
+
+.md-content blockquote blockquote blockquote {
+  background: color-mix(in srgb, var(--fg) 8%, var(--bg-secondary));
+  border-left: 3px solid color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
+/* ── KaTeX 防止顶部文字被截 ──────────────────────────────────── */
+
+.md-content .katex-display {
+  overflow-x: visible;
+  overflow-y: visible;
+  padding: 4px 0;
+}
+
+.md-content .katex {
+  line-height: 1.4;
+}
+
+/* ── 脚注滚动偏移 ────────────────────────────────────────────── */
+
+.md-content {
+  scroll-padding-top: 56px;
 }

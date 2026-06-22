@@ -1,32 +1,33 @@
 import { useEffect, useRef, useState } from 'react';
+import type { ExportFormat } from '../../features/export/export';
 
-interface ExportPdfModalProps {
+interface ExportModalProps {
   open: boolean;
   fileName: string | null;
-  onConfirm: () => Promise<void> | void;
+  onConfirm: (format: ExportFormat) => Promise<void> | void;
   onClose: () => void;
 }
 
-/**
- * 导出 PDF 前的应用层弹窗。
- * 目的：与系统打印对话框做出明显视觉区分——先在 app 内呈现“将要导出 X”，
- * 用户点击「打开打印对话框」后再吊起 webview 的系统打印 UI。
- */
-export function ExportPdfModal({ open, fileName, onConfirm, onClose }: ExportPdfModalProps) {
+const OPTIONS: Array<{ format: ExportFormat; title: string; hint: string }> = [
+  { format: 'pdf', title: 'PDF', hint: '生成独立 PDF 文件' },
+  { format: 'html', title: 'HTML', hint: '保留当前预览样式' },
+  { format: 'markdown', title: 'Markdown', hint: '另存为新的 .md 文件' },
+];
+
+export function ExportPdfModal({ open, fileName, onConfirm, onClose }: ExportModalProps) {
   const [busy, setBusy] = useState(false);
+  const [format, setFormat] = useState<ExportFormat>('pdf');
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  // 进入弹窗后焦点交给主按钮，方便键盘操作。
   useEffect(() => {
     if (!open) {
       setBusy(false);
+      setFormat('pdf');
       return;
     }
-    const btn = dialogRef.current?.querySelector<HTMLButtonElement>('[data-primary]');
-    btn?.focus();
+    dialogRef.current?.querySelector<HTMLButtonElement>('[data-primary]')?.focus();
   }, [open]);
 
-  // Esc 关闭
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -45,7 +46,7 @@ export function ExportPdfModal({ open, fileName, onConfirm, onClose }: ExportPdf
     if (busy) return;
     setBusy(true);
     try {
-      await onConfirm();
+      await onConfirm(format);
     } finally {
       setBusy(false);
       onClose();
@@ -67,33 +68,46 @@ export function ExportPdfModal({ open, fileName, onConfirm, onClose }: ExportPdf
         aria-labelledby="export-modal-title"
         ref={dialogRef}
       >
-        <div className="export-modal-header">
-          <span className="export-modal-badge">md++</span>
-          <h3 id="export-modal-title">导出 PDF</h3>
-        </div>
-        {fileName && (
-          <p className="export-modal-target">
-            <span className="export-modal-target-label">当前文档</span>
-            <span className="export-modal-target-name">{fileName}</span>
-          </p>
-        )}
-        <p className="export-modal-hint">
-          点击下方按钮后会调起<strong>系统打印对话框</strong>，请在「目的地 / Destination」中选择
-          <strong>「另存为 PDF」</strong>，然后保存到本地文件即可。
-        </p>
-        <div className="export-modal-actions">
-          <button type="button" className="export-modal-btn" onClick={onClose} disabled={busy}>
-            取消
-          </button>
-          <button
-            type="button"
-            className="export-modal-btn primary"
-            data-primary
-            onClick={handleConfirm}
-            disabled={busy}
-          >
-            {busy ? '准备中…' : '打开打印对话框'}
-          </button>
+        <div className="export-modal-inner">
+          <div className="export-modal-header">
+            <span className="export-modal-badge">md++</span>
+            <h3 id="export-modal-title">导出文件</h3>
+          </div>
+          {fileName && (
+            <p className="export-modal-target">
+              <span className="export-modal-target-label">当前文档</span>
+              <span className="export-modal-target-name">{fileName}</span>
+            </p>
+          )}
+          <div className="export-format-grid" role="radiogroup" aria-label="导出格式">
+            {OPTIONS.map((option) => (
+              <button
+                key={option.format}
+                type="button"
+                className={`export-format-option ${format === option.format ? 'active' : ''}`}
+                onClick={() => setFormat(option.format)}
+                role="radio"
+                aria-checked={format === option.format}
+              >
+                <span>{option.title}</span>
+                <small>{option.hint}</small>
+              </button>
+            ))}
+          </div>
+          <div className="export-modal-actions">
+            <button type="button" className="export-modal-btn" onClick={onClose} disabled={busy}>
+              取消
+            </button>
+            <button
+              type="button"
+              className="export-modal-btn primary"
+              data-primary
+              onClick={handleConfirm}
+              disabled={busy}
+            >
+              {busy ? '导出中...' : '导出'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

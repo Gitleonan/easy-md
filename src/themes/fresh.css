@@ -1,0 +1,35 @@
+/*
+ * md++ 内置主题：清新 (Fresh)
+ * 干净明亮的默认风格，蓝色强调色搭配极淡银灰背景。
+ */
+:root {
+  --bg: #fafbfc;
+  --bg-secondary: #f0f2f5;
+  --surface-raised: #ffffff;
+  --fg: #1a1d23;
+  --fg-muted: #5a6172;
+  --accent: #4f7aed;
+  --accent-soft: rgba(79, 122, 237, 0.08);
+  --accent-hover: #3b66d4;
+  --border: #e4e7ec;
+  --code-bg: #f6f8fa;
+  --code-inline-bg: rgba(142, 150, 170, 0.12);
+  --code-inline-fg: #4f7aed;
+  --mark-linear-color: #7aa2f7;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0c0f14;
+  --bg-secondary: #13171f;
+  --surface-raised: #1a1f2b;
+  --fg: #e4e7ec;
+  --fg-muted: #8b93a5;
+  --accent: #7aa2f7;
+  --accent-soft: rgba(122, 162, 247, 0.1);
+  --accent-hover: #8fb4ff;
+  --border: #242a36;
+  --code-bg: #151921;
+  --code-inline-bg: rgba(101, 117, 133, 0.16);
+  --code-inline-fg: #7aa2f7;
+  --mark-linear-color: #3d5fa0;
+}

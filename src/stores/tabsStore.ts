@@ -10,6 +10,10 @@ interface TabsState {
   activeTabId: string | null;
   openTab: (filePath: string) => Promise<void>;
   closeTab: (id: string) => void;
+  closeTabsToLeft: (id: string) => void;
+  closeTabsToRight: (id: string) => void;
+  closeOtherTabs: (id: string) => void;
+  moveTab: (id: string, targetId: string) => void;
   setActive: (id: string) => void;
   setScrollTop: (id: string, scrollTop: number) => void;
   updateSource: (id: string, source: string, html: string, toc: TocItem[]) => void;
@@ -19,6 +23,16 @@ interface TabsState {
 
 let seq = 0;
 const SESSION_KEY = 'mdpp.openTabs.v1';
+
+/**
+ * 路径比较归一化：把斜杠统一为反斜杠并转小写。
+ * Windows 文件系统大小写不敏感，但 JS 字符串 === 是大小写敏感的，
+ * 不归一化会导致 `C:\Foo.md` 与 `c:\foo.md` 被误判为不同文件，
+ * 进而让"已打开则激活"的去重逻辑失效。
+ */
+function normalizePathKey(p: string): string {
+  return p.replace(/\//g, '\\').replace(/\\+/g, '\\').toLowerCase();
+}
 
 function saveSession(tabs: Tab[], activeTabId: string | null) {
   try {
@@ -71,6 +85,7 @@ async function buildTab(filePath: string): Promise<Tab> {
     toc,
     scrollTop: 0,
     tocExpanded: {},
+    isLoading: false,
   };
 }
 
@@ -94,25 +109,55 @@ export const useTabsStore = create<TabsState>((set, get) => ({
   async openTab(filePath) {
     console.log('[openTab] called with:', filePath);
     const normalized = filePath.replace(/\//g, '\\');
+    const targetKey = normalizePathKey(filePath);
     const existing = get().tabs.find(
-      (t) => t.filePath === normalized || t.filePath === filePath,
+      (t) => normalizePathKey(t.filePath) === targetKey,
     );
     if (existing) {
       console.log('[openTab] file already open, switching to tab:', existing.id);
       set({ activeTabId: existing.id });
       return;
     }
+    // 先插入一个 loading 占位 tab，让用户立刻看到反馈
+    const placeholderId = `tab-${++seq}`;
+    const fileName = normalized.split(/[/\\]/).pop() || normalized;
+    const placeholder: Tab = {
+      id: placeholderId,
+      filePath: normalized,
+      fileName,
+      source: '',
+      html: '',
+      toc: [],
+      scrollTop: 0,
+      tocExpanded: {},
+      isLoading: true,
+    };
+    set((s) => {
+      const tabs = [...s.tabs, placeholder];
+      syncSessionAndWatcher(tabs, placeholderId);
+      return { tabs, activeTabId: placeholderId };
+    });
     try {
       const tab = await buildTab(normalized);
       console.log('[openTab] tab built successfully:', tab.id, tab.fileName);
       set((s) => {
-        const tabs = [...s.tabs, tab];
-        syncSessionAndWatcher(tabs, tab.id);
-        return { tabs, activeTabId: tab.id };
+        const tabs = s.tabs.map((t) => (t.id === placeholderId ? { ...tab, id: placeholderId, isLoading: false } : t));
+        syncSessionAndWatcher(tabs, placeholderId);
+        return { tabs };
       });
     } catch (err) {
       console.error('[openTab] buildTab failed:', err);
-      throw err;
+      // 构建失败时保留 tab 但显示错误信息，而不是直接删除（避免链接点击后闪关）
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      set((s) => {
+        const tabs = s.tabs.map((t) => (
+          t.id === placeholderId
+            ? { ...t, isLoading: false, html: `<div class="mermaid-error" role="note">打开文件失败：${errorMsg}</div>`, source: '' }
+            : t
+        ));
+        syncSessionAndWatcher(tabs, s.activeTabId);
+        return { tabs };
+      });
     }
   },
 
@@ -126,6 +171,52 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       }
       syncSessionAndWatcher(tabs, activeTabId);
       return { tabs, activeTabId };
+    });
+  },
+
+  closeTabsToLeft(id) {
+    set((s) => {
+      const idx = s.tabs.findIndex((t) => t.id === id);
+      if (idx <= 0) return s;
+      const tabs = s.tabs.slice(idx);
+      const activeTabId = tabs.some((t) => t.id === s.activeTabId) ? s.activeTabId : id;
+      syncSessionAndWatcher(tabs, activeTabId);
+      return { tabs, activeTabId };
+    });
+  },
+
+  closeTabsToRight(id) {
+    set((s) => {
+      const idx = s.tabs.findIndex((t) => t.id === id);
+      if (idx < 0 || idx >= s.tabs.length - 1) return s;
+      const tabs = s.tabs.slice(0, idx + 1);
+      const activeTabId = tabs.some((t) => t.id === s.activeTabId) ? s.activeTabId : id;
+      syncSessionAndWatcher(tabs, activeTabId);
+      return { tabs, activeTabId };
+    });
+  },
+
+  closeOtherTabs(id) {
+    set((s) => {
+      const tab = s.tabs.find((t) => t.id === id);
+      if (!tab) return s;
+      const tabs = [tab];
+      syncSessionAndWatcher(tabs, id);
+      return { tabs, activeTabId: id };
+    });
+  },
+
+  moveTab(id, targetId) {
+    if (id === targetId) return;
+    set((s) => {
+      const from = s.tabs.findIndex((t) => t.id === id);
+      const to = s.tabs.findIndex((t) => t.id === targetId);
+      if (from < 0 || to < 0) return s;
+      const tabs = [...s.tabs];
+      const [moved] = tabs.splice(from, 1);
+      tabs.splice(to, 0, moved);
+      syncSessionAndWatcher(tabs, s.activeTabId);
+      return { tabs };
     });
   },
 
@@ -151,15 +242,26 @@ export const useTabsStore = create<TabsState>((set, get) => ({
   async reloadTab(id) {
     const tab = get().tabs.find((t) => t.id === id);
     if (!tab) return;
-    const next = await buildTab(tab.filePath);
+    // 重载时显示 loading 状态
     set((s) => ({
-      tabs: s.tabs.map((t) => (
-        t.id === id
-          ? { ...next, id, scrollTop: t.scrollTop, tocExpanded: t.tocExpanded }
-          : t
-      )),
-      activeTabId: s.activeTabId,
+      tabs: s.tabs.map((t) => (t.id === id ? { ...t, isLoading: true } : t)),
     }));
+    try {
+      const next = await buildTab(tab.filePath);
+      set((s) => ({
+        tabs: s.tabs.map((t) => (
+          t.id === id
+            ? { ...next, id, scrollTop: t.scrollTop, tocExpanded: t.tocExpanded, isLoading: false }
+            : t
+        )),
+        activeTabId: s.activeTabId,
+      }));
+    } catch {
+      // 构建失败时恢复非 loading 状态，保留旧内容
+      set((s) => ({
+        tabs: s.tabs.map((t) => (t.id === id ? { ...t, isLoading: false } : t)),
+      }));
+    }
   },
 
   async restoreSession() {
@@ -173,10 +275,10 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         console.error('[restoreSession] failed to reopen', path, err);
       }
     }
-    const normalizedActive = session.activePath?.replace(/\//g, '\\');
-    const active = get().tabs.find(
-      (t) => t.filePath === normalizedActive || t.filePath === session.activePath,
-    );
+    const normalizedActive = session.activePath ? normalizePathKey(session.activePath) : null;
+    const active = normalizedActive
+      ? get().tabs.find((t) => normalizePathKey(t.filePath) === normalizedActive)
+      : null;
     if (active) get().setActive(active.id);
   },
 }));

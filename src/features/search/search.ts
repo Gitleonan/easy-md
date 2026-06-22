@@ -1,3 +1,5 @@
+import { smoothScrollToElement } from '../../utils/smoothScroll';
+
 const MARK_CLASS = 'search-mark';
 const MARK_CURRENT_CLASS = 'search-mark-current';
 
@@ -69,25 +71,5 @@ export function focusMatch(marks: HTMLElement[], index: number): void {
   const mark = marks[index];
   if (!mark) return;
 
-  const scroller = findScrollParent(mark);
-  if (scroller) {
-    const markRect = mark.getBoundingClientRect();
-    const scrollerRect = scroller.getBoundingClientRect();
-    const top = markRect.top - scrollerRect.top - (scroller.clientHeight / 2) + (markRect.height / 2);
-    scroller.scrollTo({ top: scroller.scrollTop + top, behavior: 'smooth' });
-  } else if (typeof mark.scrollIntoView === 'function') {
-    mark.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }
-}
-
-function findScrollParent(el: HTMLElement): HTMLElement | null {
-  let current = el.parentElement;
-  while (current) {
-    const style = window.getComputedStyle(current);
-    const overflowY = style.overflowY;
-    const canScroll = /(auto|scroll|overlay)/.test(overflowY) && current.scrollHeight > current.clientHeight;
-    if (canScroll) return current;
-    current = current.parentElement;
-  }
-  return null;
+  smoothScrollToElement(mark, null, 'center');
 }

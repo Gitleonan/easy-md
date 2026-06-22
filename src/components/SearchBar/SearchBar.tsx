@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { X, ChevronUp, ChevronDown } from 'lucide-react';
 import { useSearchStore } from '../../stores/searchStore';
 import { useTabsStore } from '../../stores/tabsStore';
 import { highlightMatches, clearHighlights, focusMatch } from '../../features/search/search';
@@ -21,9 +22,10 @@ export function SearchBar({ contentRef }: SearchBarProps) {
     const el = contentRef.current;
     if (!visible && el) {
       clearHighlights(el);
+      setKeyword('');
       setResult(0, 0);
     }
-  }, [visible, contentRef, setResult]);
+  }, [visible, contentRef, setKeyword, setResult]);
 
   // 获取当前 tab 的 html，用于感知内容变化
   const tabHtml = useTabsStore((s) => {
@@ -89,16 +91,22 @@ export function SearchBar({ contentRef }: SearchBarProps) {
         />
         {keyword && (
           <button className="searchbar-clear" onClick={clearKeyword} title="清空搜索" aria-label="清空搜索">
-            ×
+            <X size={12} strokeWidth={2} />
           </button>
         )}
       </div>
       <span className="searchbar-count">
         {total > 0 ? `${current + 1}/${total}` : '0/0'}
       </span>
-      <button className="searchbar-btn" onClick={prev} title="上一个">↑</button>
-      <button className="searchbar-btn" onClick={next} title="下一个">↓</button>
-      <button className="searchbar-btn" onClick={() => setVisible(false)} title="关闭">×</button>
+      <button className="searchbar-btn" onClick={prev} title="上一个">
+        <ChevronUp size={14} strokeWidth={1.5} />
+      </button>
+      <button className="searchbar-btn" onClick={next} title="下一个">
+        <ChevronDown size={14} strokeWidth={1.5} />
+      </button>
+      <button className="searchbar-btn" onClick={() => setVisible(false)} title="关闭">
+        <X size={14} strokeWidth={1.5} />
+      </button>
     </div>
   );
 }

@@ -31,12 +31,74 @@ describe('tabsStore', () => {
     expect(useTabsStore.getState().tabs).toHaveLength(1);
   });
 
+  it('deduplicates paths that differ only by case or slash style on Windows', async () => {
+    await useTabsStore.getState().openTab('C:\\Foo\\readme.md');
+    await useTabsStore.getState().openTab('c:/foo/README.MD');
+    await useTabsStore.getState().openTab('C:\\\\Foo\\\\readme.md');
+    expect(useTabsStore.getState().tabs).toHaveLength(1);
+  });
+
   it('closes a tab and clears active if last', async () => {
     await useTabsStore.getState().openTab('C:/a.md');
     const id = useTabsStore.getState().tabs[0].id;
     useTabsStore.getState().closeTab(id);
     expect(useTabsStore.getState().tabs).toHaveLength(0);
     expect(useTabsStore.getState().activeTabId).toBeNull();
+  });
+
+  it('closes tabs to the left and keeps the selected tab active when needed', async () => {
+    await useTabsStore.getState().openTab('C:/a.md');
+    await useTabsStore.getState().openTab('C:/b.md');
+    await useTabsStore.getState().openTab('C:/c.md');
+    const middleId = useTabsStore.getState().tabs[1].id;
+
+    useTabsStore.getState().closeTabsToLeft(middleId);
+
+    const s = useTabsStore.getState();
+    expect(s.tabs.map((t) => t.fileName)).toEqual(['b.md', 'c.md']);
+    expect(s.activeTabId).toBe(s.tabs[1].id);
+  });
+
+  it('closes tabs to the right and activates the clicked tab if active was removed', async () => {
+    await useTabsStore.getState().openTab('C:/a.md');
+    await useTabsStore.getState().openTab('C:/b.md');
+    await useTabsStore.getState().openTab('C:/c.md');
+    const firstId = useTabsStore.getState().tabs[0].id;
+
+    useTabsStore.getState().closeTabsToRight(firstId);
+
+    const s = useTabsStore.getState();
+    expect(s.tabs.map((t) => t.fileName)).toEqual(['a.md']);
+    expect(s.activeTabId).toBe(firstId);
+  });
+
+  it('closes other tabs', async () => {
+    await useTabsStore.getState().openTab('C:/a.md');
+    await useTabsStore.getState().openTab('C:/b.md');
+    await useTabsStore.getState().openTab('C:/c.md');
+    const middleId = useTabsStore.getState().tabs[1].id;
+
+    useTabsStore.getState().closeOtherTabs(middleId);
+
+    const s = useTabsStore.getState();
+    expect(s.tabs.map((t) => t.fileName)).toEqual(['b.md']);
+    expect(s.activeTabId).toBe(middleId);
+  });
+
+  it('moves a tab before the drop target and persists the new order', async () => {
+    await useTabsStore.getState().openTab('C:/a.md');
+    await useTabsStore.getState().openTab('C:/b.md');
+    await useTabsStore.getState().openTab('C:/c.md');
+    const [a, , c] = useTabsStore.getState().tabs;
+
+    useTabsStore.getState().moveTab(c.id, a.id);
+
+    expect(useTabsStore.getState().tabs.map((t) => t.fileName)).toEqual(['c.md', 'a.md', 'b.md']);
+    expect(JSON.parse(localStorage.getItem('mdpp.openTabs.v1') || '{}').paths).toEqual([
+      'C:\\c.md',
+      'C:\\a.md',
+      'C:\\b.md',
+    ]);
   });
 
   it('sets active tab', async () => {

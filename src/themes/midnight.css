@@ -1,0 +1,42 @@
+/*
+ * md++ 内置主题：午夜 (Midnight)
+ * 深邃蓝黑底色配霓虹蓝高亮，适合深夜长时间阅读。
+ */
+:root {
+  --bg: #0a0e1a;
+  --bg-secondary: #0f1320;
+  --surface-raised: #151a2e;
+  --fg: #c8d3e6;
+  --fg-muted: #6b7a99;
+  --accent: #6cb6ff;
+  --accent-soft: rgba(108, 182, 255, 0.1);
+  --accent-hover: #8dc8ff;
+  --border: #1e2640;
+  --code-bg: #0d1117;
+  --code-inline-bg: rgba(108, 182, 255, 0.1);
+  --code-inline-fg: #6cb6ff;
+  --mark-linear-color: #385a8a;
+}
+
+:root[data-theme="dark"],
+:root {
+  /* 强制深色 — 即使系统是 light 也保持暗色 */
+  --bg: #0a0e1a;
+  --bg-secondary: #0f1320;
+  --surface-raised: #151a2e;
+  --fg: #c8d3e6;
+  --fg-muted: #6b7a99;
+  --accent: #6cb6ff;
+  --accent-soft: rgba(108, 182, 255, 0.1);
+  --accent-hover: #8dc8ff;
+  --border: #1e2640;
+  --code-bg: #0d1117;
+  --code-inline-bg: rgba(108, 182, 255, 0.1);
+  --code-inline-fg: #6cb6ff;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.35);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+  --glass-bg: rgba(10, 14, 26, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.04);
+  --mark-linear-color: #385a8a;
+}

@@ -1,11 +1,110 @@
 use base64::{engine::general_purpose, Engine as _};
 use std::fs;
 use std::path::{Path, PathBuf};
+use tauri::Manager;
 
 /// 读取文件文本内容
 #[tauri::command]
 pub async fn read_text_file(path: String) -> Result<String, String> {
     fs::read_to_string(&path).map_err(|e| format!("读取文件失败: {}", e))
+}
+
+/// 写入文件文本内容
+#[tauri::command]
+pub async fn write_text_file(path: String, content: String) -> Result<(), String> {
+    fs::write(&path, &content).map_err(|e| format!("写入文件失败: {}", e))
+}
+
+/// 列出自定义主题目录下的 CSS 文件
+#[tauri::command]
+pub async fn list_custom_themes(app: tauri::AppHandle) -> Result<Vec<String>, String> {
+    let dir = get_themes_dir(&app)?;
+    if !dir.exists() {
+        fs::create_dir_all(&dir).map_err(|e| format!("创建主题目录失败: {}", e))?;
+    }
+    let entries = fs::read_dir(&dir).map_err(|e| format!("读取主题目录失败: {}", e))?;
+    let mut names = Vec::new();
+    for entry in entries.flatten() {
+        let name = entry.file_name().to_string_lossy().to_string();
+        if name.ends_with(".css") {
+            names.push(name);
+        }
+    }
+    names.sort();
+    Ok(names)
+}
+
+/// 保存自定义主题 CSS
+#[tauri::command]
+pub async fn save_custom_theme(app: tauri::AppHandle, name: String, css: String) -> Result<(), String> {
+    let dir = get_themes_dir(&app)?;
+    if !dir.exists() {
+        fs::create_dir_all(&dir).map_err(|e| format!("创建主题目录失败: {}", e))?;
+    }
+    // 安全检查：只允许 .css 文件名，禁止路径穿越
+    let safe_name = sanitize_filename(&name);
+    if !safe_name.ends_with(".css") || safe_name.len() < 5 {
+        return Err("无效的主题文件名".to_string());
+    }
+    let path = dir.join(&safe_name);
+    fs::write(&path, &css).map_err(|e| format!("保存主题失败: {}", e))
+}
+
+/// 读取自定义主题 CSS
+#[tauri::command]
+pub async fn read_custom_theme(app: tauri::AppHandle, name: String) -> Result<String, String> {
+    let dir = get_themes_dir(&app)?;
+    let safe_name = sanitize_filename(&name);
+    let path = dir.join(&safe_name);
+    fs::read_to_string(&path).map_err(|e| format!("读取主题失败: {}", e))
+}
+
+/// 删除自定义主题
+#[tauri::command]
+pub async fn delete_custom_theme(app: tauri::AppHandle, name: String) -> Result<(), String> {
+    let dir = get_themes_dir(&app)?;
+    let safe_name = sanitize_filename(&name);
+    let path = dir.join(&safe_name);
+    fs::remove_file(&path).map_err(|e| format!("删除主题失败: {}", e))
+}
+
+/// 获取应用数据目录路径，前端可在此写入缓存文件
+#[tauri::command]
+pub async fn get_app_data_dir(app: tauri::AppHandle) -> Result<String, String> {
+    app.path()
+        .app_data_dir()
+        .map(|p| p.to_string_lossy().to_string())
+        .map_err(|e| format!("获取数据目录失败: {}", e))
+}
+
+/// 清理文件名：移除路径分隔符和 .. 防止路径穿越
+fn sanitize_filename(name: &str) -> String {
+    name.replace('/', "")
+        .replace('\\', "")
+        .replace("..", "")
+}
+
+fn get_themes_dir(app: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
+    // 优先使用安装目录下的 themes 子目录
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(install_dir) = exe.parent() {
+            let themes = install_dir.join("themes");
+            // 如果安装目录不可写，回退到 app_data_dir
+            if themes.exists() || install_dir.join("md++.exe").exists() {
+                if !themes.exists() {
+                    std::fs::create_dir_all(&themes)
+                        .map_err(|e| format!("创建主题目录失败: {}", e))?;
+                }
+                return Ok(themes);
+            }
+        }
+    }
+    // 开发模式或回退：使用 app data dir
+    let data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("获取数据目录失败: {}", e))?;
+    Ok(data_dir.join("themes"))
 }
 
 /// 解析图片：网络地址原样返回，本地路径读为 data URL；失败返回占位符

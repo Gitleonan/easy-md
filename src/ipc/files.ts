@@ -34,3 +34,33 @@ const PLACEHOLDER =
 export async function watchFiles(paths: string[]): Promise<void> {
   await invoke('watch_files', { paths });
 }
+
+/** 写入文件文本内容 */
+export async function writeFile(path: string, content: string): Promise<void> {
+  await invoke('write_text_file', { path, content });
+}
+
+/** 列出自定义主题 CSS 文件名 */
+export async function listCustomThemes(): Promise<string[]> {
+  return invoke<string[]>('list_custom_themes');
+}
+
+/** 保存自定义主题 CSS */
+export async function saveCustomTheme(name: string, css: string): Promise<void> {
+  await invoke('save_custom_theme', { name, css });
+}
+
+/** 读取自定义主题 CSS */
+export async function readCustomTheme(name: string): Promise<string> {
+  return invoke<string>('read_custom_theme', { name });
+}
+
+/** 删除自定义主题 */
+export async function deleteCustomTheme(name: string): Promise<void> {
+  await invoke('delete_custom_theme', { name });
+}
+
+/** 获取应用数据目录路径 */
+export async function getAppDataDir(): Promise<string> {
+  return invoke<string>('get_app_data_dir');
+}

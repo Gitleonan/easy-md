@@ -1,4 +1,37 @@
-/** 生成独立 HTML 文件（用于 PDF 导出窗口） */
+import { save as saveDialog } from '@tauri-apps/plugin-dialog';
+import { writeFile } from '../../ipc/files';
+import themesCss from '../../styles/themes.css?raw';
+import proseCss from '../../styles/prose.css?raw';
+
+export type ExportFormat = 'pdf' | 'html' | 'markdown';
+
+interface ExportDocumentOptions {
+  element: HTMLElement;
+  source: string;
+  fileName: string;
+  theme: 'light' | 'dark';
+  format: ExportFormat;
+}
+
+const EXPORT_FILTERS: Record<ExportFormat, { name: string; extensions: string[] }> = {
+  pdf: { name: 'PDF', extensions: ['pdf'] },
+  html: { name: 'HTML', extensions: ['html'] },
+  markdown: { name: 'Markdown', extensions: ['md'] },
+};
+
+const EXTENSIONS: Record<ExportFormat, string> = {
+  pdf: 'pdf',
+  html: 'html',
+  markdown: 'md',
+};
+
+/** 读取当前运行时注入的自定义主题 CSS（如有） */
+function getActiveThemeCss(): string {
+  const el = document.getElementById('custom-theme-css');
+  return el?.textContent || '';
+}
+
+/** 生成独立 HTML 文件。 */
 export function buildStandaloneHtml(
   contentHtml: string,
   css: string,
@@ -12,283 +45,229 @@ export function buildStandaloneHtml(
   <title>md++ export</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.css">
   <style>
     ${BASE_CSS}
     ${css}
+    ${getActiveThemeCss()}
   </style>
 </head>
 <body class="md-content">${contentHtml}</body>
 </html>`;
 }
 
-/** 打开 PDF 导出窗口。 */
-export async function exportPdf(el: HTMLElement, theme: 'light' | 'dark'): Promise<void> {
-  const full = buildStandaloneHtml(el.innerHTML, '', theme);
-  const frame = document.createElement('iframe');
-  frame.dataset.mdExportFrame = 'true';
-  frame.style.position = 'fixed';
-  frame.style.right = '0';
-  frame.style.bottom = '0';
-  frame.style.width = '0';
-  frame.style.height = '0';
-  frame.style.border = '0';
-  frame.style.opacity = '0';
-  frame.srcdoc = full;
-  frame.onload = () => {
-    const printWindow = frame.contentWindow;
-    if (!printWindow) return;
-    printWindow.focus();
-    printWindow.print();
-    setTimeout(() => frame.remove(), 1000);
-  };
-  document.body.appendChild(frame);
+export async function exportDocument(options: ExportDocumentOptions): Promise<string | null> {
+  if (options.format === 'pdf') {
+    // PDF 不走 saveDialog 也不走 Rust：注入隐藏 iframe + 系统打印，
+    // 让用户在打印对话框里选"另存为 PDF"。这样 themes.css / prose.css /
+    // KaTeX / Mermaid SVG 全部按预览样式输出，而不是把 DOM 抠成纯文本。
+    await printDocumentToPdf(options);
+    return null;
+  }
+
+  const path = await saveDialog({
+    defaultPath: replaceExtension(options.fileName, EXTENSIONS[options.format]),
+    filters: [EXPORT_FILTERS[options.format]],
+  });
+  if (!path) return null;
+
+  const content = buildExportContent(options);
+  await writeFile(path, content);
+  return path;
 }
 
+export async function exportPdf(el: HTMLElement, theme: 'light' | 'dark', fileName = 'document.md'): Promise<string | null> {
+  return exportDocument({
+    element: el,
+    source: el.innerText,
+    fileName,
+    theme,
+    format: 'pdf',
+  });
+}
+
+/**
+ * 用 hidden iframe + window.print() 触发系统打印。
+ *
+ * 为什么不调用主窗口的 window.print()：那样会把 TitleBar / Sidebar /
+ * SearchBar 一起塞进 PDF。打印 iframe 的好处是 iframe 内的 document
+ * 是一个干净的 HTML 文档，只有我们注入的内容和样式。
+ *
+ * 注意：在 jsdom 测试环境里 iframe.contentWindow.print 不存在，
+ * 用 buildStandaloneHtml 的可注入性来做替身验证（见 export.test.ts）。
+ */
+async function printDocumentToPdf(options: ExportDocumentOptions): Promise<void> {
+  const html = buildStandaloneHtml(options.element.innerHTML, PRINT_CSS, options.theme);
+
+  const iframe = document.createElement('iframe');
+  iframe.setAttribute('aria-hidden', 'true');
+  iframe.style.cssText =
+    'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;';
+  document.body.appendChild(iframe);
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const onLoad = () => {
+        iframe.removeEventListener('load', onLoad);
+        const win = iframe.contentWindow;
+        if (!win) {
+          reject(new Error('打印窗口未就绪'));
+          return;
+        }
+        // 等下一帧让浏览器把 KaTeX / shiki / mermaid SVG 都布好版
+        requestAnimationFrame(() => {
+          try {
+            win.focus();
+            win.print();
+            resolve();
+          } catch (err) {
+            reject(err instanceof Error ? err : new Error(String(err)));
+          }
+        });
+      };
+      iframe.addEventListener('load', onLoad);
+      // 用 srcdoc 注入而不是 document.write，避免被 CSP / 沙盒拦
+      iframe.srcdoc = html;
+    });
+  } finally {
+    // 给打印对话框一点缓冲再清理 iframe，否则部分浏览器会取消打印任务
+    setTimeout(() => iframe.remove(), 1000);
+  }
+}
+
+function buildExportContent(options: ExportDocumentOptions): string {
+  if (options.format === 'markdown') return options.source;
+  // format === 'html'
+  return buildStandaloneHtml(options.element.innerHTML, '', options.theme);
+}
+
+function replaceExtension(fileName: string, extension: string): string {
+  const clean = fileName.trim() || 'document';
+  return clean.replace(/\.[^.\\/]+$/, '') + `.${extension}`;
+}
+
+const APP_CSS = `${themesCss}\n${proseCss}`.trim() || `
+.code-block-wrapper {
+  position: relative;
+  margin: 16px 0;
+}
+.code-block-wrapper pre {
+  margin: 0;
+}
+.github-alert,
+.md-container {
+  padding: 10px 14px;
+  margin: 16px 0;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+`;
+
 const BASE_CSS = `
+${APP_CSS}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body.md-content {
+  display: block;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 32px 72px;
+  overflow: visible;
+}
+
+body.md-content .back-to-top,
+body.md-content .word-count-badge,
+body.md-content .code-block-copy,
+body.md-content .code-block-lang {
+  display: none;
+}
+
 :root {
-  --bg: #fafafa;
-  --fg: #1a1a1a;
-  --bg-secondary: #f0f0f0;
-  --fg-muted: #6b7280;
-  --border: #e5e7eb;
-  --accent: #2563eb;
-  --accent-soft: #2563eb12;
-  --code-bg: #f4f4f5;
-  --mark-bg: #fef9c3;
+  --bg: #ffffff;
+  --fg: rgb(60 60 67);
+  --bg-secondary: #f6f6f7;
+  --fg-muted: rgb(60 60 67 / 0.78);
+  --border: #e2e2e3;
+  --accent: #5086a1;
+  --accent-soft: rgb(131 208 218 / 0.14);
+  --code-bg: #f6f8fa;
+  --code-inline-bg: rgb(142 150 170 / 0.14);
+  --code-inline-fg: #5086a1;
+  --mark-linear-color: #8cccd5;
   --radius-sm: 6px;
-  --radius-md: 10px;
+  --radius-md: 8px;
   --radius-lg: 16px;
+  --t-color: 250ms ease;
 }
 
 :root[data-theme="dark"] {
-  --bg: #111111;
-  --fg: #e5e5e5;
-  --bg-secondary: #1a1a1a;
-  --fg-muted: #9ca3af;
-  --border: #262626;
-  --accent: #60a5fa;
-  --accent-soft: #60a5fa12;
-  --code-bg: #1e1e1e;
-  --mark-bg: #854d0e40;
-}
-
-@media print {
-  :root[data-theme="dark"] {
-    --bg: #ffffff;
-    --fg: #1a1a1a;
-    --bg-secondary: #f0f0f0;
-    --fg-muted: #6b7280;
-    --border: #e5e7eb;
-    --accent: #2563eb;
-    --accent-soft: #2563eb12;
-    --code-bg: #f4f4f5;
-    --mark-bg: #fef9c3;
-  }
+  --bg: #1b1b1f;
+  --fg: rgb(255 255 245 / 0.86);
+  --bg-secondary: #161618;
+  --fg-muted: rgb(235 235 245 / 0.6);
+  --border: #2e2e32;
+  --accent: #8cccd5;
+  --accent-soft: rgb(131 208 218 / 0.14);
+  --code-bg: #202127;
+  --code-inline-bg: rgb(101 117 133 / 0.16);
+  --code-inline-fg: #8cccd5;
+  --mark-linear-color: #5086a1;
 }
 
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-ui);
   font-size: 15px;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   margin: 0;
 }
+`;
 
-.md-content {
-  max-width: 780px;
-  margin: 0 auto;
-  padding: 40px 32px;
-}
-
-.md-content h1, .md-content h2, .md-content h3,
-.md-content h4, .md-content h5, .md-content h6 {
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  line-height: 1.3;
-  margin-top: 1.8em;
-  margin-bottom: 0.5em;
-}
-
-.md-content h1:first-child,
-.md-content h2:first-child,
-.md-content h3:first-child {
-  margin-top: 0;
-}
-
-.md-content h1 {
-  font-size: 2em;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  margin-bottom: 0.4em;
-}
-
-.md-content h2 {
-  font-size: 1.5em;
-  padding-bottom: 0.3em;
-  border-bottom: 1px solid var(--border);
-  margin-top: 2.2em;
-}
-
-.md-content h3 { font-size: 1.25em; }
-.md-content h4 { font-size: 1.0625em; }
-.md-content h5 { font-size: 0.9375em; }
-.md-content h6 { font-size: 0.875em; color: var(--fg-muted); }
-
-.md-content p { margin: 0 0 1em; }
-
-.md-content a {
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 450;
-}
-
-.md-content strong { font-weight: 650; }
-
-.md-content code:not(pre code) {
-  background: var(--code-bg);
-  padding: 0.15em 0.4em;
-  border-radius: 4px;
-  font-size: 0.88em;
-  font-family: "JetBrains Mono", "Fira Code", "SFMono-Regular", Consolas, monospace;
-  font-weight: 450;
-}
-
-.md-content pre {
-  background: var(--code-bg);
-  padding: 16px 18px;
-  border-radius: var(--radius-md);
-  overflow: auto;
-  margin: 0 0 16px;
-  font-size: 0.85em;
-  line-height: 1.65;
-}
-
-.md-content pre code {
-  background: none;
-  padding: 0;
-  border-radius: 0;
-  font-size: 1em;
-  font-weight: 400;
-}
-
-.md-content blockquote {
-  border-left: 3px solid var(--accent);
-  padding: 0.5em 16px;
-  color: var(--fg-muted);
-  margin: 0 0 1em;
-  background: var(--accent-soft);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-}
-
-.md-content blockquote p:last-child { margin-bottom: 0; }
-
-.md-content table {
-  border-collapse: collapse;
-  margin: 0 0 1em;
-  width: 100%;
-  font-size: 0.9375em;
-}
-
-.md-content th, .md-content td {
-  padding: 8px 14px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-
-.md-content th {
-  background: var(--bg-secondary);
-  font-weight: 600;
-  font-size: 0.875em;
-}
-
-.md-content tr:last-child td { border-bottom: none; }
-
-.md-content img { max-width: 100%; border-radius: var(--radius-md); }
-
-.md-content mark {
-  background: var(--mark-bg);
-  padding: 0.05em 0.2em;
-  border-radius: 3px;
-}
-
-.md-content input[type="checkbox"] {
-  margin-right: 0.5em;
-  accent-color: var(--accent);
-}
-
-.md-content ul, .md-content ol {
-  padding-left: 1.5em;
-  margin: 0 0 1em;
-}
-
-.md-content li + li { margin-top: 0.25em; }
-
-.md-content hr {
-  border: none;
-  height: 1px;
-  background: var(--border);
-  margin: 2.5em 0;
-}
-
-.md-content .footnotes {
-  font-size: 0.875em;
-  color: var(--fg-muted);
-  border-top: 1px solid var(--border);
-  padding-top: 1em;
-  margin-top: 2.5em;
-}
-
-.md-content .mermaid { text-align: center; margin: 1.5em 0; }
-.md-content .katex-display { margin: 1.5em 0; overflow-x: auto; }
-
-/* shiki code blocks */
-.md-content .shiki {
-  background: var(--code-bg) !important;
-  padding: 16px 18px;
-  border-radius: var(--radius-md);
-  overflow: auto;
-  margin: 0 0 16px;
-  font-size: 0.85em;
-  line-height: 1.65;
-}
-
-.md-content .shiki code {
-  background: none;
-  padding: 0;
-  border-radius: 0;
-  font-size: 1em;
-}
-
-/* 搜索高亮 */
-.md-content mark.search-mark {
-  background: #fef08a;
-  border-radius: 2px;
-  color: #1a1a1a;
-  padding: 0.05em 0.15em;
-}
-
-.md-content mark.search-mark-current {
-  background: #f59e0b;
-  color: #1a1a1a;
-}
-
-:root[data-theme="dark"] .md-content mark.search-mark {
-  background: #854d0e50;
-  color: #fef08a;
-}
-
-:root[data-theme="dark"] .md-content mark.search-mark-current {
-  background: #d97706;
-  color: #1a1a1a;
-}
-
-/* 代码块包装器 */
-.code-block-wrapper { position: relative; margin: 0 0 16px; }
-.code-block-wrapper pre { margin: 0; }
-.code-block-copy { display: none; }
-.code-block-lang { display: none; }
+/**
+ * 打印场景额外补丁：
+ * - print-color-adjust: exact 保证背景色 / 代码块底色 / GitHub Alert 配色被打印
+ * - @page 控制纸张边距，避免 webview 的默认页边距把内容挤到只剩一半
+ * - 强制 light 主题：暗色背景会被浏览器打印逻辑拒绝（节省墨水）
+ * - 代码块、表格、Mermaid SVG 禁止跨页断开
+ */
+const PRINT_CSS = `
+  html, body {
+    background: #ffffff !important;
+    color: rgb(35 35 40) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  @page {
+    size: A4;
+    margin: 18mm 16mm;
+  }
+  @media print {
+    body.md-content {
+      max-width: none;
+      margin: 0;
+      padding: 0;
+    }
+    pre, .code-block-wrapper, table, .mermaid, blockquote, .github-alert, .md-container {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    h1, h2, h3 {
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+    img, svg {
+      max-width: 100%;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+  }
 `;

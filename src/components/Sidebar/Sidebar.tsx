@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { PanelLeftClose, PanelLeftOpen, X } from 'lucide-react';
+import { smoothScrollToElement } from '../../utils/smoothScroll';
 import type { TocItem } from '../../types';
 
 export interface TocNode extends TocItem {
@@ -55,16 +57,6 @@ export function filterTocTree(nodes: TocNode[], keyword: string): TocNode[] {
   });
 }
 
-function SidebarToggleIcon({ collapsed }: { collapsed: boolean }) {
-  return (
-    <svg className="sidebar-toggle-icon" viewBox="0 0 20 20" aria-hidden="true">
-      <rect x="3" y="4" width="14" height="12" rx="2" />
-      <path d="M8 4v12" />
-      {collapsed ? <path d="M11 8l3 2-3 2" /> : <path d="M14 8l-3 2 3 2" />}
-    </svg>
-  );
-}
-
 export function Sidebar({ toc, activeId }: { toc: TocItem[]; activeId?: string | null }) {
   const [collapsed, setCollapsed] = useState(false);
   const [query, setQuery] = useState('');
@@ -85,7 +77,7 @@ export function Sidebar({ toc, activeId }: { toc: TocItem[]; activeId?: string |
             onClick={(e) => {
               e.preventDefault();
               const el = document.getElementById(n.id);
-              el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              if (el) smoothScrollToElement(el, null, 'start');
             }}
           >
             {splitHighlightedText(n.text, query.trim()).map((part, index) => (
@@ -110,7 +102,10 @@ export function Sidebar({ toc, activeId }: { toc: TocItem[]; activeId?: string |
           title={collapsed ? '展开目录' : '收起目录'}
           aria-label={collapsed ? '展开目录' : '收起目录'}
         >
-          <SidebarToggleIcon collapsed={collapsed} />
+          {collapsed
+            ? <PanelLeftOpen className="sidebar-toggle-icon" size={14} strokeWidth={1.5} />
+            : <PanelLeftClose className="sidebar-toggle-icon" size={14} strokeWidth={1.5} />
+          }
         </button>
       </div>
       {!collapsed && (
@@ -125,7 +120,7 @@ export function Sidebar({ toc, activeId }: { toc: TocItem[]; activeId?: string |
               />
               {query && (
                 <button className="toc-search-clear" onClick={() => setQuery('')} title="清空目录搜索" aria-label="清空目录搜索">
-                  ×
+                  <X size={12} strokeWidth={2} />
                 </button>
               )}
             </div>

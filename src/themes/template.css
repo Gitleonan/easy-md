@@ -1,0 +1,101 @@
+/*
+ * ══════════════════════════════════════════════════════════════
+ *  md++ 自定义主题模板
+ * ══════════════════════════════════════════════════════════════
+ *
+ *  使用方法：
+ *    1. 复制本文件，重命名为你喜欢的名字（如 my-theme.css）
+ *    2. 修改下方变量值（只需覆盖你想改的部分）
+ *    3. 在 md++ 的主题管理器中导入该文件
+ *
+ *  提示：未修改的变量会使用内置默认值。
+ *       暗色模式变量写在 :root[data-theme="dark"] 下。
+ *
+ * ══════════════════════════════════════════════════════════════
+ */
+
+:root {
+  /* ── 表面色 ───────────────────────────────────────────────── */
+  --bg: #ffffff;            /* 主背景（页面底色） */
+  --bg-secondary: #f6f6f7;  /* 次级背景（侧边栏、引用块底色、表格条纹） */
+  --surface-raised: #ffffff; /* 浮起表面（卡片、模态框、代码块复制按钮） */
+
+  /* ── 文字色 ───────────────────────────────────────────────── */
+  --fg: #1a1d23;            /* 主文字 */
+  --fg-muted: #5a6172;      /* 次要文字（说明、时间戳、计数） */
+
+  /* ── 强调色 ───────────────────────────────────────────────── */
+  --accent: #4f7aed;        /* 链接、活跃标签、按钮、选中态 */
+  --accent-soft: rgba(79, 122, 237, 0.08); /* 淡底色（活跃标签背景、focus ring） */
+  --accent-hover: #3b66d4;  /* 按钮/链接悬停态 */
+
+  /* ── 边框 ─────────────────────────────────────────────────── */
+  --border: #e4e7ec;        /* 全局边框色 */
+
+  /* ── 代码块 ───────────────────────────────────────────────── */
+  --code-bg: #f6f8fa;       /* 代码块背景 */
+  --code-inline-bg: rgba(142, 150, 170, 0.12); /* 行内代码背景 */
+  --code-inline-fg: #4f7aed; /* 行内代码文字色 */
+
+  /* ── 搜索高亮 ─────────────────────────────────────────────── */
+  --mark-linear-color: #7aa2f7; /* 文字高亮动画色 */
+
+  /* ── 阴影 ─────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.08);
+
+  /* ── 圆角 ─────────────────────────────────────────────────── */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  /* ── 字体（取消注释以自定义）──────────────────────────────── */
+  /* --font-ui: 'Your UI Font', sans-serif; */
+  /* --font-mono: 'Your Mono Font', monospace; */
+
+  /* ── 玻璃效果（TitleBar / Sidebar / SearchBar）────────────── */
+  /* --glass-bg: rgba(255, 255, 255, 0.72); */
+  /* --glass-border: rgba(255, 255, 255, 0.5); */
+  /* --glass-blur: 20px; */
+}
+
+/* ── 暗色模式覆盖（可选）────────────────────────────────────── */
+:root[data-theme="dark"] {
+  --bg: #0c0f14;
+  --bg-secondary: #13171f;
+  --surface-raised: #1a1f2b;
+  --fg: #e4e7ec;
+  --fg-muted: #8b93a5;
+  --accent: #7aa2f7;
+  --accent-soft: rgba(122, 162, 247, 0.1);
+  --accent-hover: #8fb4ff;
+  --border: #242a36;
+  --code-bg: #151921;
+  --code-inline-bg: rgba(101, 117, 133, 0.16);
+  --code-inline-fg: #7aa2f7;
+}
+
+/* ══════════════════════════════════════════════════════════════
+ *  高级：Markdown 内容覆盖
+ * ══════════════════════════════════════════════════════════════
+ *  取消注释并修改以覆盖 Markdown 排版细节。
+ *  这些规则只影响 .md-content 内的渲染内容。
+ */
+
+/* 标题 */
+/* .md-content h1 { font-size: 32px; font-weight: 800; } */
+/* .md-content h2 { border-top: 2px solid var(--accent); } */
+
+/* 代码块 */
+/* .md-content pre { border-radius: 16px; border: 1px solid var(--border); } */
+
+/* 引用块 */
+/* .md-content blockquote { background: transparent; border-left: 3px solid var(--accent); } */
+
+/* 链接 */
+/* .md-content a { text-decoration: none; border-bottom: 1px solid var(--accent); } */
+
+/* 表格 */
+/* .md-content table { font-size: 13px; } */
+/* .md-content th { text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; } */

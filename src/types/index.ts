@@ -13,6 +13,7 @@ export interface Tab {
   toc: TocItem[];
   scrollTop: number;
   tocExpanded: Record<string, boolean>;
+  isLoading: boolean;
 }
 
 export interface RecentFile {

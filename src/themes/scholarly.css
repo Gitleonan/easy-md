@@ -1,0 +1,46 @@
+/*
+ * md++ 内置主题：学术 (Scholarly)
+ * 暖白纸张色调，衬线体优先，适合论文/长文阅读。
+ */
+:root {
+  --bg: #faf8f5;
+  --bg-secondary: #f2efe9;
+  --surface-raised: #ffffff;
+  --fg: #2c2418;
+  --fg-muted: #7a6e5e;
+  --accent: #8b5e3c;
+  --accent-soft: rgba(139, 94, 60, 0.08);
+  --accent-hover: #a0714e;
+  --border: #e0d9cf;
+  --code-bg: #f5f0e8;
+  --code-inline-bg: rgba(139, 94, 60, 0.08);
+  --code-inline-fg: #8b5e3c;
+  --mark-linear-color: #c4a77d;
+}
+
+:root[data-theme="dark"] {
+  --bg: #1a1814;
+  --bg-secondary: #211e19;
+  --surface-raised: #2a2620;
+  --fg: #d9d0c4;
+  --fg-muted: #8a7e6e;
+  --accent: #c49a6c;
+  --accent-soft: rgba(196, 154, 108, 0.1);
+  --accent-hover: #d4aa7c;
+  --border: #3a3428;
+  --code-bg: #1e1b16;
+  --code-inline-bg: rgba(196, 154, 108, 0.1);
+  --code-inline-fg: #c49a6c;
+  --mark-linear-color: #6b5940;
+}
+
+/* 学术风：衬线体标题 */
+.md-content h1, .md-content h2, .md-content h3,
+.md-content h4, .md-content h5, .md-content h6 {
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.md-content blockquote {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+}
