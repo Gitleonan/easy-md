@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.2.0",
   "type": "module",
-  "description": "md++ — Windows 轻量便捷的 Markdown 阅读器",
+  "description": "md++ — 轻量便捷的 Markdown 阅读器 (Windows / macOS)",
   "author": "leonan",
   "scripts": {
     "dev": "vite",

@@ -1,13 +1,13 @@
 # md++
 
-> **md++** — Windows 平台轻量化 Markdown 阅读器。架构预留 macOS 适配。
+> **md++** — 轻量化 Markdown 阅读器，支持 Windows / macOS。
 
 [![made with Tauri](https://img.shields.io/badge/made%20with-Tauri%20v2-orange)](https://tauri.app)
 [![React](https://img.shields.io/badge/frontend-React%2018%20%2B%20TS-blue)](https://react.dev)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
-![md++ 软件界面介绍图](docs/assets/github-promo.png)
+![md++ 软件界面介绍图](assets/github-promo.png)
 
 ## 🤔 为什么做这个
 
@@ -41,18 +41,21 @@ Windows 下一直没有好用的 Markdown 预览工具。想快速看一眼 `.md
 - 🪟 **毛玻璃 UI** — 标题栏、搜索栏、字数统计等采用毛玻璃模糊效果
 - 🔝 **平滑滚动** — 回到顶部 / TOC 跳转 / 搜索导航均带缓动动画
 
-### 跨端预留
-- 🍎 平台差异隔离在 Rust 层，前端零耦合，macOS 仅需补图标与打包配置
+### 跨平台
+- 🍎 平台差异隔离在 Rust 层，前端零耦合，Windows / macOS 均已适配
 
 ---
 
 ## 📦 下载安装
 
-前往 [Releases](../../releases) 下载最新的 Windows 安装包（`.msi` 或 `.exe`），双击安装即可。
+前往 [Releases](../../releases) 下载对应平台的安装包：
 
-**系统要求：** Windows 10 1809+（需 WebView2 运行时，Win11 默认自带）。
+| 平台 | 格式 | 系统要求 |
+|------|------|----------|
+| Windows | `.msi` | Windows 10 1809+（需 WebView2 运行时，Win11 默认自带） |
+| macOS | `.dmg` | macOS 11.0+ (Big Sur) |
 
-安装后会自动注册 `.md` / `.markdown` 文件的右键菜单 **"用 md++ 打开"**
+安装后可自动注册 `.md` / `.markdown` 文件的右键菜单 **"用 md++ 打开"**
 
 ---
 
@@ -69,7 +72,7 @@ Windows 下一直没有好用的 Markdown 预览工具。想快速看一眼 `.md
 | `Ctrl+Shift+Z` | 进入 / 退出 Zen 专注模式 |
 | `ESC` | 关闭搜索 / 退出 Zen 模式 / 关闭灯箱 |
 
-> macOS 版本将使用 `⌘` 替代 `Ctrl`。
+> macOS 使用 `⌘` 替代 `Ctrl`。
 
 ---
 
@@ -87,7 +90,7 @@ Windows 下一直没有好用的 Markdown 预览工具。想快速看一眼 `.md
 ### 启动开发
 
 ```bash
-git clone https://github.com/<your-account>/easy-md.git
+git clone https://github.com/Gitleonan/easy-md.git
 cd easy-md
 pnpm install
 pnpm tauri dev
@@ -108,7 +111,9 @@ cd src-tauri && cargo test   # 后端 Rust 测试
 pnpm tauri build
 ```
 
-产物位于 `src-tauri/target/release/bundle/`，包含 `.msi` 与 `.exe`。
+产物位于 `src-tauri/target/release/bundle/`：
+- **Windows** — `.msi` 安装包
+- **macOS** — `.dmg` 磁盘映像
 
 ---
 
@@ -131,8 +136,8 @@ React 18 + TS    ── 渲染管线 / UI / 状态管理 / 业务逻辑
 ## 🗺️ 路线图
 
 - [x] v0.1 — Windows 首发，完整阅读功能
-- [x] v0.2 — 编辑模式 / 自定义主题 / Zen 专注模式
-- [ ] v0.3 — macOS 适配（`.dmg` 分发）
+- [x] v0.2 — 编辑模式 / 自定义主题 / Zen 专注模式 / macOS 适配
+- [ ] v0.3 — 监听修订模式
 
 ---
 

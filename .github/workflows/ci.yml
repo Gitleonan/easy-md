@@ -13,7 +13,10 @@ concurrency:
 jobs:
   test-frontend:
     name: Frontend Tests
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
 
@@ -32,7 +35,10 @@ jobs:
   build-check:
     name: Build Check
     needs: test-frontend
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
 
