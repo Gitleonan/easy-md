@@ -1,6 +1,6 @@
 [package]
 name = "app"
-version = "0.1.0"
+version = "0.2.0"
 description = "md++ — Windows 轻量便捷的 Markdown 阅读器"
 authors = ["leonan"]
 license = "MIT"

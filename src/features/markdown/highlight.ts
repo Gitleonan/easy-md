@@ -1,4 +1,4 @@
-import { createHighlighter, type Highlighter } from 'shiki';
+import { createHighlighter, createJavaScriptRegexEngine, type Highlighter } from 'shiki';
 
 const themes = { light: 'github-light', dark: 'github-dark' } as const;
 export type ThemeName = keyof typeof themes;
@@ -10,6 +10,7 @@ async function getHL(): Promise<Highlighter> {
     highlighterPromise = createHighlighter({
       themes: ['github-light', 'github-dark'],
       langs: ['typescript', 'javascript', 'bash', 'json', 'markdown', 'rust', 'python'],
+      engine: createJavaScriptRegexEngine(),
     });
   }
   return highlighterPromise;

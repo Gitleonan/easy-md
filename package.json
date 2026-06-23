@@ -9,6 +9,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "sync-version": "node scripts/sync-version.mjs",
     "tauri": "tauri",
     "test": "vitest run",
     "test:watch": "vitest"
